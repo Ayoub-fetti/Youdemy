@@ -4,7 +4,7 @@ require_once __DIR__ . '/../../models/User.php';
 require_once __DIR__ . '/../../models/Admin.php';
 session_start();
 
-// Vérification de la session admin
+// verification de la session admin
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
     header('Location: ../user/login.php');
     exit();
@@ -15,10 +15,31 @@ $pdo = $db->connect();
 $user = new User($pdo);
 $admin = new Admin($pdo);
 $errors = [];
+
 $users = $admin->getAllUsers();
 $totalEtudiants = $admin->totalEtudiant();
 $totalEnseignants = $admin->totalEnseignant();
 $totalCours = $admin->totalCours();
+
+
+// logic pour la suppression d'un utilisateur 
+if (isset($_POST['delete_user'])) {
+    $admin = new Admin($pdo);
+    $userId = $_POST['user_id']; // Récupérer l'ID de l'utilisateur à supprimer
+    
+    // Vérifier si l'utilisateur à supprimer n'est pas un admin
+    $stmt = $pdo->prepare("SELECT role FROM utilisateurs WHERE id = ?");
+    $stmt->execute([$userId]);
+    $userRole = $stmt->fetchColumn();
+    
+    if ($userRole !== 'admin') {
+        $admin->deleteUser($userId);
+        header('Location: dashbord.php?delete_success=1');
+    } else {
+        header('Location: dashbord.php?delete_error=1');
+    }
+    exit();
+}
 
 
 ?>
@@ -30,9 +51,9 @@ $totalCours = $admin->totalCours();
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>Administration</title>
-  <script src="https://cdn.tailwindcss.com">
-  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/umd/lucide.min.js"></script>
  </head>
 
  <body class="bg-gray-100 font-sans antialiased">
@@ -103,8 +124,7 @@ $totalCours = $admin->totalCours();
    <div class="flex-1 p-6">
     <div class="flex items-center justify-between">
      <div class="relative">
-      <input class="w-full px-4 py-2 pl-10 text-gray-700 bg-white border rounded-full focus:outline-none" placeholder="Search here..." type="text"/>
-      <!-- <i class="absolute left-0 ml-3 text-gray-500 fas fa-search"> -->
+      <input class="w-full px-4 py-2 pl-10 text-gray-700 bg-white border rounded-full focus:outline-none" id="searchInput" placeholder="Search here..." type="text"/>
       </i>
      </div>
     </div>
@@ -173,34 +193,50 @@ $totalCours = $admin->totalCours();
           Email
          </th>
          <th class="px-4 py-2 text-left">
-             Role
+              Role
             </th>
             <th class="px-4 py-2 text-left">
-                Status
+                 Status
             </th>
             <th class="px-4 py-2 text-left">
             Rejoint
+            </th>
+            <th class="px-4 py-2 text-left">
             </th>
         </tr>
        </thead>
        <tbody>
         <?php foreach ($users as $user) { ?>
-        <tr>
+        <tr class="transaction-row">
          <td class="px-4 py-2 border-t">
           <?php echo htmlspecialchars($user['nom']); ?>
          </td>
          <td class="px-4 py-2 border-t">
           <?php echo htmlspecialchars($user['email']); ?>
          </td>
-         <td class="px-4 py-2 border-t">
-             <?php echo htmlspecialchars($user['status']); ?>
-             </td>
-             <td class="px-4 py-2 border-t">
-                 <?php echo htmlspecialchars($user['role']); ?>
-                </td>
-                <td class="px-4 py-2 border-t">
+        <td class="px-4 py-2 border-t">
+            <span class="bg-gray-200 p-1 rounded-lg inline-block w-24 text-center"><?php echo htmlspecialchars($user['role']);?></span>
+            </td>
+            <td class="px-4 py-2 border-t" id="status-<?php echo $user['id']; ?>" onclick="toggleUserStatus(<?php echo $user['id']; ?>)">
+             <?php if ($user['role'] !== 'admin'): ?>
+             <span class="<?php echo $user['status'] === 'actif' ? 'bg-green-300' : 'bg-red-300'; ?> p-1 rounded-lg inline-block w-24 text-center">
+                <?php echo htmlspecialchars($user['status']); ?>
+            </span>
+            <?php endif; ?>
+        </td>
+        <td class="px-4 py-2 border-t">
                     <?php echo htmlspecialchars($user['date_creation']); ?>
-         </td>
+        </td>
+        <td class="mr-40">
+            <?php if ($user['role'] !== 'admin'): ?>
+                <form method="POST" action="dashbord.php">
+                    <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
+                    <button type="submit" name="delete_user" class="bg-transparent border-0 cursor-pointer">
+                        <i class="fas fa-user-slash text-red-500"></i>
+                    </button>
+                </form>
+            <?php endif; ?>
+        </td>
         </tr>
         <?php } ?>
        </tbody>
@@ -209,5 +245,7 @@ $totalCours = $admin->totalCours();
     </div>
    </div>
   </div>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> <!-- bibliotheque de Js permet de creer des alertes personnalisees -->
+  <script src="../../public/assets/js/Dashbord.js"></script>
  </body>
 </html>

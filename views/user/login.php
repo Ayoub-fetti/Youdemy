@@ -28,8 +28,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_SESSION['user_role'] = $user->getRole();
             
             // Check if user is inactive
-            if ($user->getstatus() === 'inactif') {
-                header('Location: ../cours/inactif.php');
+            if ($user->getRole() === 'etudiant' && $user->getstatus() === 'inactif') {
+                header('Location: ../Confirmation/inactif.php');
+                exit();
+            }
+            
+            // Check if user is an inactive instructor
+            if ($user->getRole() === 'enseignant' && $user->getstatus() === 'inactif') {
+                header('Location: ../Confirmation/verification.php');
                 exit();
             }
             
@@ -55,7 +61,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
