@@ -88,10 +88,13 @@ class User {
                 return ['success' => false, 'message' => "Cet email est déjà utilisé"];
             }
     
+            // Determine default status based on role
+            $status = ($role === 'enseignant') ? 'inactif' : 'actif';
+    
             // Creer le nouvel utilisateur
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-            $stmt = $this->pdo->prepare("INSERT INTO utilisateurs (nom, email, password, role) VALUES (?, ?, ?, ?)");
-            $stmt->execute([$nom, $email, $hashedPassword, $role]);
+            $stmt = $this->pdo->prepare("INSERT INTO utilisateurs (nom, email, password, role, status) VALUES (?, ?, ?, ?, ?)");
+            $stmt->execute([$nom, $email, $hashedPassword, $role, $status]);
     
             return ['success' => true, 'message' => "Inscription réussie!"];
         } catch(PDOException $e) {

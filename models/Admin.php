@@ -31,4 +31,30 @@ class Admin extends User {
         return $stmt->fetchColumn();
     }
 
+
+    // fonction pour supprimer un utilisateur
+    public function deleteUser($id) {
+     
+         $stmt = $this->pdo->prepare("DELETE FROM utilisateurs WHERE id = :id");
+        $stmt->execute(['id' => $id]);
+        return $stmt->fetchColumn();
+    }
+
+    // fonction pour changer le statut d'un utilisateur (suspendre)
+    public function toggleStatus($userId) {
+        // Recuperer le statut actuel
+        $stmt = $this->pdo->prepare("SELECT status FROM utilisateurs WHERE id = ?");
+        $stmt->execute([$userId]);
+        $currentStatus = $stmt->fetchColumn();
+
+        // Determiner le nouveau statut
+        $newStatus = ($currentStatus === 'actif') ? 'inactif' : 'actif';
+
+        // Mettre e jour le statut
+        $stmt = $this->pdo->prepare("UPDATE utilisateurs SET status = ? WHERE id = ?");
+        $stmt->execute([$newStatus, $userId]);
+
+        return $newStatus;
+    }
+
 }
