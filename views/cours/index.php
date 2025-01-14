@@ -36,23 +36,23 @@
    </div>
   </header>
   <main class="text-center py-16">
-   <h1 class="text-5xl font-bold mb-6">
+   <h1 class="text-5xl text-white font-bold mb-6">
     Apprenez plus vite grâce aux meilleurs cours.
    </h1>
 
    <div class="mt-12">
-    <p class="mx-10 text-2xl">
+    <p class="mx-10 text-white text-2xl">
      Bienvenue sur notre plateforme d'apprentissage en ligne, où vous pouvez découvrir et suivre les meilleurs cours pour améliorer vos compétences linguistiques. Profitez d'un enseignement de qualité et d'une communauté dynamique pour atteindre vos objectifs.
     </p>
    </div>
  
   </main>
-  <button id="commencer" class="bg-black text-white px-6 py-3 rounded-full flex items-center justify-center mx-auto">
+  <button id="commencer" class="bg-white text-violet-500 px-6 py-3 rounded-full flex items-center justify-center mx-auto">
   Découvrez les cours
     <i class="fas fa-arrow-right ml-2">
     </i>
    </button>
-  <section class="bg-white py-8 mt-40">
+  <section class="bg-white py-8" style="margin-top: 160px;">
    <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-5 gap-8 text-center">
     <div class="md:col-span-1">
      <p class="text-2xl font-bold">
