@@ -1,13 +1,13 @@
 #commencer:hover{
-    background-color: white;
-    color: black;
+    background-color: violet;
+    color: white;
 
 }
 #connecter:hover{
-    color: yellow;
-    border: 1px solid yellow;
+    color: violet;
+    border: 1px solid violet;
 }
 #navbar:hover{
-    color: yellow;
+    color: violet;
     text-decoration: underline;
 }
