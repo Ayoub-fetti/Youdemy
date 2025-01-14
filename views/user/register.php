@@ -1,3 +1,58 @@
+<?php 
+require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../../models/User.php';
+session_start();
+
+$db = new Database();
+$pdo = $db->connect();
+$user = new User($pdo);
+$errors = [];
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+  $nom = trim($_POST['username']);
+  $email = trim($_POST['email']);
+  $password = $_POST['password'];
+  $passwordC = $_POST['passwordC'];
+  $role = $_POST['role'];
+
+  // Validation
+  if (empty($nom)) {
+      $errors['name'] = "Le nom d'utilisateur est requis";
+  }
+  if (empty($email)) {
+      $errors['email'] = "L'email est requis";
+  }
+  if (empty($password)) {
+      $errors['password'] = "Le mot de passe est requis";
+  }
+  if ($password !== $passwordC) {
+      $errors['passwordC'] = "Les mots de passe ne correspondent pas";
+  }
+  if (empty($role)) {
+    $errors['role'] = " Le rôle est requis";
+}
+
+  if (empty($errors)) {
+      // Utilisation de la méthode register de la classe User
+      $result = $user->register($nom, $email, $password, $role);
+      
+      if ($result['success']) {
+          // Enregistrement réussi
+          $_SESSION['success_message'] = $result['message'];
+          header("Location: login.php");
+          exit();
+      } else {
+          // Erreur lors de l'enregistrement
+          $errors['register'] = $result['message'];
+      }
+  }
+}
+
+?>
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,6 +63,25 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body class="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-500 to-purple-500">
+
+<?php if (!empty($errors)): ?>
+            <div class="alert alert-danger">
+                <?php foreach($errors as $error): ?>
+                    <p><i class="fas fa-exclamation-circle"></i> <?php echo htmlspecialchars($error); ?></p>
+                <?php endforeach; ?>
+                <?php $errors = []; ?>
+            </div>
+        <?php endif; ?>
+        
+        <?php if (isset($_SESSION['success_message'])): ?>
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i>
+                <?php 
+                echo htmlspecialchars($_SESSION['success_message']); 
+                unset($_SESSION['success_message']);
+                ?>
+            </div>
+        <?php endif; ?>
 
   <form action="register.php" method="post" class="relative w-[400px] h-auto bg-white/10 backdrop-blur-md border border-white/20 shadow-lg rounded-lg px-6 py-8 text-white">
     <a href="../cours/index.php" class="absolute top-4 left-4 text-white">

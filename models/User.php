@@ -8,6 +8,8 @@ class User {
     protected $email;
     protected $role;
     protected $status;
+    protected $date_creation;
+    
 
     public function __construct($pdo)
     {
@@ -23,6 +25,7 @@ class User {
                 $this->email = $user['email'];
                 $this->role = $user['role'];
                 $this->status = $user['status'];
+                $this->date_creation = $user['date_creation'];
             }
         }
     }
@@ -33,12 +36,14 @@ class User {
     public function getEmail()  { return $this->email; }
     public function getRole()  { return $this->role; }
     public function getstatus() { return $this->status; }
+    public function getDate_creation() { return $this->date_creation; }
 
     // setters 
     public function setName($nom) { $this->nom = $nom; }
     public function setEmail($email) { $this->email = $email; }
     public function setRole($role) { $this->role = $role; }
     public function setstatus($status) { $this->status = $status; }
+    public function setDate_creation($date_creation) { $this->date_creation = $date_creation; }
 
 
     // login method
@@ -53,7 +58,7 @@ class User {
             if ($user['role'] == 'admin' && $password == $user['password']) {
                 $isValid = true;
             } else {
-                $isValid = ($password == $user['password']);
+                $isValid = password_verify($password, $user['password']);
             }
 
             if ($isValid) {
@@ -74,9 +79,26 @@ class User {
         }
         return false;
     }
-
+    public function register($nom, $email, $password, $role) {
+        try {
+            // VErifier si l'email existe dEjA
+            $stmt = $this->pdo->prepare("SELECT id FROM utilisateurs WHERE email = ?");
+            $stmt->execute([$email]);
+            if ($stmt->rowCount() > 0) {
+                return ['success' => false, 'message' => "Cet email est déjà utilisé"];
+            }
     
-   
+            // Creer le nouvel utilisateur
+            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+            $stmt = $this->pdo->prepare("INSERT INTO utilisateurs (nom, email, password, role) VALUES (?, ?, ?, ?)");
+            $stmt->execute([$nom, $email, $hashedPassword, $role]);
+    
+            return ['success' => true, 'message' => "Inscription réussie!"];
+        } catch(PDOException $e) {
+            return ['success' => false, 'message' => "Erreur lors de l'inscription: " . $e->getMessage()];
+        }
+    }
+ 
 }
 
 ?>

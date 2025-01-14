@@ -1,32 +1,58 @@
+<?php 
+require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../../models/User.php';
+require_once __DIR__ . '/../../models/Admin.php';
+session_start();
+
+// Vérification de la session admin
+if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
+    header('Location: ../user/login.php');
+    exit();
+}
+
+$db = new Database();
+$pdo = $db->connect();
+$user = new User($pdo);
+$admin = new Admin($pdo);
+$errors = [];
+$users = $admin->getAllUsers();
+$totalEtudiants = $admin->totalEtudiant();
+$totalEnseignants = $admin->totalEnseignant();
+$totalCours = $admin->totalCours();
+
+
+?>
+
+
+
 <html lang="en">
  <head>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-  <title>
-   Dashboard
-  </title>
+  <title>Administration</title>
   <script src="https://cdn.tailwindcss.com">
   </script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
  </head>
+
  <body class="bg-gray-100 font-sans antialiased">
   <div class="flex">
    <!-- Sidebar -->
    <div class="w-64 bg-white h-screen shadow-md">
     <div class="flex items-center justify-center h-16 border-b">
      <div class="text-2xl font-bold text-purple-600">
-      CL
+      Bienvenue
      </div>
-     <div class="ml-2 text-xl font-semibold">
-      Codinglab
+     <div class="ml-2 text-2xl font-semibold">
+     <?php echo htmlspecialchars(ucfirst($_SESSION['user_nom'])); ?>
      </div>
     </div>
     <nav class="mt-10">
-     <a class="flex items-center px-4 py-2 text-gray-700 bg-gray-100" href="#">
+     <a class="flex items-center px-4 py-2 text-gray-700 bg-gray-100" href="dashbord.php">
       <i class="fas fa-home">
       </i>
       <span class="ml-2">
-       Dashboard
+       Tableau de bord
       </span>
      </a>
      <a class="flex items-center px-4 py-2 mt-2 text-gray-600 hover:bg-gray-100" href="#">
@@ -64,27 +90,13 @@
        Share
       </span>
      </a>
-     <a class="flex items-center px-4 py-2 mt-2 text-gray-600 hover:bg-gray-100" href="../user/logout.php">
+     <a class="flex items-center px-4 py-2 mt-2 text-gray-600 hover:bg-red-200" href="../user/logout.php">
       <i class="fas fa-sign-out-alt">
       </i>
       <span class="ml-2">
-       Logout
+      Déconnexion
       </span>
      </a>
-     <!-- <div class="flex items-center px-4 py-2 mt-2 text-gray-600">
-      <i class="fas fa-moon">
-      </i>
-      <span class="ml-2">
-       Dark Mode
-      </span>
-      <label class="ml-auto inline-flex items-center cursor-pointer">
-       <input class="sr-only" type="checkbox"/>
-       <div class="w-10 h-4 bg-gray-300 rounded-full shadow-inner">
-       </div>
-       <div class="w-6 h-6 bg-white rounded-full shadow -ml-1 transform transition-transform duration-300">
-       </div>
-      </label>
-     </div> -->
     </nav>
    </div>
    <!-- Main Content -->
@@ -95,53 +107,49 @@
       <!-- <i class="absolute left-0 ml-3 text-gray-500 fas fa-search"> -->
       </i>
      </div>
-     <img alt="User profile picture" class="w-10 h-10 rounded-full" src="https://placehold.co/40x40"/>
     </div>
     <div class="mt-6">
      <h2 class="text-2xl font-semibold">
-      <i class="fas fa-tachometer-alt text-blue-500">
-      </i>
-      Dashboard
+      <i class="fas fa-users-cog text-violet-500"></i>
+
+      Tableau de bord
      </h2>
      <div class="grid grid-cols-1 gap-6 mt-6 sm:grid-cols-2 lg:grid-cols-3">
-      <div class="p-6 bg-blue-100 rounded-lg shadow">
+      <div class="p-6 bg-violet-500 rounded-lg shadow">
        <div class="flex items-center">
-        <i class="text-3xl text-blue-500 fas fa-thumbs-up">
-        </i>
+        <i class="text-3xl text-white fas fa-chalkboard"></i>
         <div class="ml-4">
-         <h3 class="text-lg font-semibold">
-          Total Likes
+         <h3 class="text-lg text-white font-semibold">
+          Total des cours
          </h3>
-         <p class="text-2xl font-bold">
-          50,120
+         <p class="text-2xl text-white font-bold">
+          <?php echo $totalCours; ?>
          </p>
         </div>
        </div>
       </div>
-      <div class="p-6 bg-yellow-100 rounded-lg shadow">
+      <div class="p-6 bg-violet-500 rounded-lg shadow">
        <div class="flex items-center">
-        <i class="text-3xl text-yellow-500 fas fa-comments">
-        </i>
+        <i class="text-3xl text-white fas fa-user-graduate"></i>
         <div class="ml-4">
-         <h3 class="text-lg font-semibold">
-          Comments
+         <h3 class="text-lg text-white font-semibold">
+          Total des étudiants
          </h3>
-         <p class="text-2xl font-bold">
-          25,120
+         <p class="text-2xl text-white font-bold">
+          <?php echo $totalEtudiants; ?>
          </p>
         </div>
        </div>
       </div>
-      <div class="p-6 bg-purple-100 rounded-lg shadow">
+      <div class="p-6 bg-violet-500 rounded-lg shadow">
        <div class="flex items-center">
-        <i class="text-3xl text-purple-500 fas fa-share">
-        </i>
+        <i class="text-3xl text-white fas fa-chalkboard-teacher"></i>
         <div class="ml-4">
-         <h3 class="text-lg font-semibold">
-          Total Share
+         <h3 class="text-lg text-white font-semibold">
+          Total des enseignants
          </h3>
-         <p class="text-2xl font-bold">
-          10,320
+         <p class="text-2xl text-white font-bold">
+          <?php echo $totalEnseignants; ?>
          </p>
         </div>
        </div>
@@ -150,100 +158,51 @@
     </div>
     <div class="mt-8">
      <h2 class="text-2xl font-semibold">
-      <i class="fas fa-calendar-alt text-blue-500">
+      <i class="fas fa-calendar-alt text-violet-500">
       </i>
-      Recent Activity
+      Utilisateurs
      </h2>
      <div class="mt-4 overflow-x-auto">
       <table class="min-w-full bg-white rounded-lg shadow">
        <thead>
         <tr>
          <th class="px-4 py-2 text-left">
-          Name
+          Nom
          </th>
          <th class="px-4 py-2 text-left">
           Email
          </th>
          <th class="px-4 py-2 text-left">
-          Joined
-         </th>
-         <th class="px-4 py-2 text-left">
-          Type
-         </th>
-         <th class="px-4 py-2 text-left">
-          Status
-         </th>
+             Role
+            </th>
+            <th class="px-4 py-2 text-left">
+                Status
+            </th>
+            <th class="px-4 py-2 text-left">
+            Rejoint
+            </th>
         </tr>
        </thead>
        <tbody>
+        <?php foreach ($users as $user) { ?>
         <tr>
          <td class="px-4 py-2 border-t">
-          Prem Shahi
+          <?php echo htmlspecialchars($user['nom']); ?>
          </td>
          <td class="px-4 py-2 border-t">
-          premshahi@gmail.com
+          <?php echo htmlspecialchars($user['email']); ?>
          </td>
          <td class="px-4 py-2 border-t">
-          2022-02-12
-         </td>
-         <td class="px-4 py-2 border-t">
-          New
-         </td>
-         <td class="px-4 py-2 border-t">
-          Liked
+             <?php echo htmlspecialchars($user['status']); ?>
+             </td>
+             <td class="px-4 py-2 border-t">
+                 <?php echo htmlspecialchars($user['role']); ?>
+                </td>
+                <td class="px-4 py-2 border-t">
+                    <?php echo htmlspecialchars($user['date_creation']); ?>
          </td>
         </tr>
-        <tr>
-         <td class="px-4 py-2 border-t">
-          Deepa Chand
-         </td>
-         <td class="px-4 py-2 border-t">
-          deepachand@gmail.com
-         </td>
-         <td class="px-4 py-2 border-t">
-          2022-02-12
-         </td>
-         <td class="px-4 py-2 border-t">
-          Member
-         </td>
-         <td class="px-4 py-2 border-t">
-          Shared
-         </td>
-        </tr>
-        <tr>
-         <td class="px-4 py-2 border-t">
-          Prakash Shahi
-         </td>
-         <td class="px-4 py-2 border-t">
-          prakashshahi@gmail.com
-         </td>
-         <td class="px-4 py-2 border-t">
-          2022-02-13
-         </td>
-         <td class="px-4 py-2 border-t">
-          New
-         </td>
-         <td class="px-4 py-2 border-t">
-          Liked
-         </td>
-        </tr>
-        <tr>
-         <td class="px-4 py-2 border-t">
-          Manisha Chand
-         </td>
-         <td class="px-4 py-2 border-t">
-          manishachan@gmail.com
-         </td>
-         <td class="px-4 py-2 border-t">
-          2022-02-13
-         </td>
-         <td class="px-4 py-2 border-t">
-          Member
-         </td>
-         <td class="px-4 py-2 border-t">
-          Shared
-         </td>
-        </tr>
+        <?php } ?>
        </tbody>
       </table>
      </div>
