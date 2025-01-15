@@ -63,26 +63,21 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             const courseCard = `
-                <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                    <img src="${cours.image || 'https://placehold.co/600x400'}" 
-                         alt="${cours.titre}" 
-                         class="w-full h-40 object-cover">
-                    <div class="p-4">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-gray-500 text-sm flex items-center space-x-1">
-                                <i class="fas fa-id-card-alt text-gray-400"></i>
-                                <span class="creerPar">
-                                    creer par : ${cours.enseignant_nom} le 
-                                    <span>${dateFormatted}</span>
-                                </span>
+                <div id="hover" class="bg-violet-300 rounded-lg shadow-md p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-gray-500 text-sm flex items-center space-x-1">
+                            <i class="fas fa-id-card-alt text-gray-700"></i>
+                            <span class="creerPar">
+                                creer par : ${cours.enseignant_nom} le 
+                                <span>${dateFormatted}</span>
                             </span>
-                        </div>
-                        <div class="mb-2">
-                            <span class="text-purple-600 text-sm">${cours.categorie_nom}</span>
-                        </div>
-                        <h2 class="text-lg font-semibold mb-2">${cours.titre}</h2>
-                        <p class="text-gray-600 text-sm">${cours.description}</p>
+                        </span>
                     </div>
+                    <div class="mb-2">
+                        <span class="text-purple-600 text-sm">${cours.categorie_nom}</span>
+                    </div>
+                    <h2 class="text-lg font-semibold mb-2">${cours.titre}</h2>
+                    <p class="text-gray-700 text-sm">${cours.description}</p>
                 </div>
             `;
             coursContainer.innerHTML += courseCard;

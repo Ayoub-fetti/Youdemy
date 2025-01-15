@@ -65,7 +65,7 @@ CREATE TABLE `cours` (
 
 INSERT INTO `cours` (`id`, `titre`, `description`, `contenu`, `categorie_id`, `enseignant_id`, `date_creation`) VALUES
 (1, 'Introduction à la Programmation PHP', 'Apprenez les bases de la programmation PHP avec ce cours complet pour débutants', 'Contenu détaillé du cours...', 3, 6, '2025-01-15 08:00:00'),
-(2, 'Mathématiques Avancées', 'Cours de mathématiques niveau universitaire couvrant l\'algèbre linéaire', 'Contenu détaillé du cours...', 1, 7, '2025-01-15 08:30:00'),
+(2, 'Mathématiques Avancées', 'Cours de mathématiques niveau universitaire couvrant lalgèbre linéaire', 'Contenu détaillé du cours...', 1, 7, '2025-01-15 08:30:00'),
 (3, 'Développement Web Full Stack', 'Formation complète sur le développement web moderne', 'Contenu détaillé du cours...', 3, 8, '2025-01-15 09:00:00');
 
 -- --------------------------------------------------------
