@@ -1,4 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // Fonction pour vérifier si l'utilisateur est connecté
+    function isUserLoggedIn() {
+        return document.body.dataset.userLoggedIn === 'true';
+    }
+
     const searchInput = document.getElementById('searchCours');
     const coursContainer = document.querySelector('.grid');
     const paginationContainer = document.createElement('div');
@@ -54,8 +59,8 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        cours.forEach(cours => {
-            const date = new Date(cours.date_creation);
+        cours.forEach(course => {
+            const date = new Date(course.date_creation);
             const dateFormatted = date.toLocaleDateString('fr-FR', {
                 day: '2-digit',
                 month: '2-digit',
@@ -63,24 +68,53 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             const courseCard = `
-                <div id="hover" class="bg-violet-300 rounded-lg shadow-md p-4">
+                <div class="bg-violet-300 rounded-lg shadow-md p-4">
                     <div class="flex items-center justify-between mb-2">
                         <span class="text-gray-500 text-sm flex items-center space-x-1">
                             <i class="fas fa-id-card-alt text-gray-700"></i>
                             <span class="creerPar">
-                                creer par : ${cours.enseignant_nom} le 
+                                creer par : ${course.enseignant_nom} le 
                                 <span>${dateFormatted}</span>
                             </span>
                         </span>
                     </div>
                     <div class="mb-2">
-                        <span class="text-purple-600 text-sm">${cours.categorie_nom}</span>
+                        <span class="text-purple-600 text-sm">${course.categorie_nom}</span>
                     </div>
-                    <h2 class="text-lg font-semibold mb-2">${cours.titre}</h2>
-                    <p class="text-gray-700 text-sm">${cours.description}</p>
+                    <h2 class="text-lg font-semibold mb-2">${course.titre}</h2>
+                    <p class="text-gray-700 text-sm">${course.description}</p>
+                    <div class="mt-4">
+                        ${isUserLoggedIn() ? `
+                            <form action="" method="POST" class="inscription-form">
+                                <input type="hidden" name="cours_id" value="${course.id}">
+                                <button type="submit" class="inscription-btn w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition duration-300 flex items-center justify-center">
+                                    <i class="fas fa-user-plus mr-2"></i>
+                                    S'inscrire au cours
+                                </button>
+                            </form>
+                        ` : `
+                            <a href="../user/login.php" class="w-full bg-purple-700 text-white py-2 px-4 rounded-md hover:bg-gray-700 transition duration-300 flex items-center justify-center">
+                                <i class="fas fa-sign-in-alt mr-2"></i>
+                                Se connecter pour s'inscrire
+                            </a>
+                        `}
+                    </div>
                 </div>
             `;
             coursContainer.innerHTML += courseCard;
+        });
+
+        // Ajouter les gestionnaires d'evenements pour les formulaires d'inscription
+        document.querySelectorAll('.inscription-form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const button = this.querySelector('.inscription-btn');
+                button.disabled = true;
+                button.innerHTML = '<i class="fas fa-check mr-2"></i>Inscrit';
+                button.classList.remove('bg-purple-600', 'hover:bg-purple-700');
+                button.classList.add('bg-green-600', 'cursor-not-allowed');
+                this.submit();
+            });
         });
     }
 
@@ -88,10 +122,13 @@ document.addEventListener('DOMContentLoaded', function() {
     function updatePagination(totalPages, currentPage) {
         paginationContainer.innerHTML = '';
         
+        if (totalPages <= 1) return;
+
         // Bouton précédent
         if (currentPage > 1) {
-            const prevButton = createPaginationButton(currentPage - 1, '&laquo; Précédent');
-            paginationContainer.appendChild(prevButton);
+            paginationContainer.appendChild(
+                createPaginationButton(currentPage - 1, '&laquo; Précédent')
+            );
         }
 
         // Pages numérotées
@@ -99,13 +136,14 @@ document.addEventListener('DOMContentLoaded', function() {
             if (
                 i === 1 || // Première page
                 i === totalPages || // Dernière page
-                (i >= currentPage - 1 && i <= currentPage + 1) // Pages autour de la page courante
+                (i >= currentPage - 2 && i <= currentPage + 2) // Pages autour de la page courante
             ) {
-                const pageButton = createPaginationButton(i, i.toString(), i === currentPage);
-                paginationContainer.appendChild(pageButton);
+                paginationContainer.appendChild(
+                    createPaginationButton(i, i.toString(), i === currentPage)
+                );
             } else if (
-                i === currentPage - 2 ||
-                i === currentPage + 2
+                (i === currentPage - 3 && currentPage > 4) ||
+                (i === currentPage + 3 && currentPage < totalPages - 3)
             ) {
                 // Ajouter des points de suspension
                 const dots = document.createElement('span');
@@ -117,8 +155,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Bouton suivant
         if (currentPage < totalPages) {
-            const nextButton = createPaginationButton(currentPage + 1, 'Suivant &raquo;');
-            paginationContainer.appendChild(nextButton);
+            paginationContainer.appendChild(
+                createPaginationButton(currentPage + 1, 'Suivant &raquo;')
+            );
         }
     }
 
@@ -129,13 +168,15 @@ document.addEventListener('DOMContentLoaded', function() {
         button.className = `px-3 py-2 rounded-md ${
             isActive
                 ? 'bg-purple-600 text-white'
-                : 'text-gray-700 hover:bg-purple-100'
+                : 'bg-white text-gray-700 hover:bg-gray-50'
         }`;
         
-        button.addEventListener('click', () => {
-            currentPage = page;
-            loadCours(currentPage, searchTerm);
-        });
+        if (!isActive) {
+            button.addEventListener('click', () => {
+                currentPage = page;
+                loadCours(currentPage, searchTerm);
+            });
+        }
         
         return button;
     }

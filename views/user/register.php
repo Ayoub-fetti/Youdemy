@@ -29,8 +29,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       $errors['passwordC'] = "Les mots de passe ne correspondent pas";
   }
   if (empty($role)) {
-    $errors['role'] = " Le rôle est requis";
-}
+    $errors['role'] = "Le rôle est requis";
+  }
 
   if (empty($errors)) {
       // Utilisation de la méthode register de la classe User
@@ -47,11 +47,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       }
   }
 }
-
 ?>
-
-
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -62,28 +58,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
-<body class="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-500 to-purple-500">
+<body class="flex flex-col items-center min-h-screen bg-gradient-to-r from-blue-500 to-purple-500">
 
-<?php if (!empty($errors)): ?>
-            <div class="alert alert-danger">
-                <?php foreach($errors as $error): ?>
-                    <p><i class="fas fa-exclamation-circle"></i> <?php echo htmlspecialchars($error); ?></p>
-                <?php endforeach; ?>
-                <?php $errors = []; ?>
-            </div>
-        <?php endif; ?>
-        
-        <?php if (isset($_SESSION['success_message'])): ?>
-            <div class="alert alert-success">
-                <i class="fas fa-check-circle"></i>
-                <?php 
-                echo htmlspecialchars($_SESSION['success_message']); 
-                unset($_SESSION['success_message']);
-                ?>
-            </div>
-        <?php endif; ?>
+<div class="w-full max-w-md mt-6 px-4">
+  <?php if (!empty($errors)): ?>
+    <div class=" text-black p-4 rounded-md mb-4">
+      <ul class="list-disc ml-5">
+        <?php foreach ($errors as $error): ?>
+          <li><i class="fas fa-exclamation-circle"></i> <?php echo htmlspecialchars($error); ?></li>
+        <?php endforeach; ?>
+      </ul>
+    </div>
+  <?php endif; ?>
 
-  <form action="register.php" method="post" class="relative w-[400px] h-auto bg-white/10 backdrop-blur-md border border-white/20 shadow-lg rounded-lg px-6 py-8 text-white">
+</div>
+
+  <form action="register.php" method="post" class="relative w-[400px] bg-white/10 backdrop-blur-md border border-white/20 shadow-lg rounded-lg px-6 py-8 text-white">
     <a href="../cours/index.php" class="absolute top-4 left-4 text-white">
       <i class="fas fa-angle-double-left"></i>
     </a>

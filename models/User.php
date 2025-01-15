@@ -9,6 +9,7 @@ class User {
     protected $role;
     protected $status;
     protected $date_creation;
+
     public function __construct($pdo)
     {
         $this->pdo = $pdo;
@@ -37,6 +38,7 @@ class User {
     public function getDate_creation() { return $this->date_creation; }
 
     // setters 
+    public function setId($id) { $this->id = $id; }
     public function setName($nom) { $this->nom = $nom; }
     public function setEmail($email) { $this->email = $email; }
     public function setRole($role) { $this->role = $role; }
