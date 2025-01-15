@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jan 13, 2025 at 01:25 PM
+-- Generation Time: Jan 15, 2025 at 08:42 AM
 -- Server version: 8.0.30
 -- PHP Version: 8.1.10
 
@@ -32,6 +32,17 @@ CREATE TABLE `categories` (
   `nom` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+--
+-- Dumping data for table `categories`
+--
+
+INSERT INTO `categories` (`id`, `nom`) VALUES
+(5, 'Économie'),
+(4, 'Géographie'),
+(3, 'Informatique'),
+(1, 'Mathématiques'),
+(2, 'Physique');
+
 -- --------------------------------------------------------
 
 --
@@ -47,6 +58,15 @@ CREATE TABLE `cours` (
   `enseignant_id` int DEFAULT NULL,
   `date_creation` timestamp NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `cours`
+--
+
+INSERT INTO `cours` (`id`, `titre`, `description`, `contenu`, `categorie_id`, `enseignant_id`, `date_creation`) VALUES
+(1, 'Introduction à la Programmation PHP', 'Apprenez les bases de la programmation PHP avec ce cours complet pour débutants', 'Contenu détaillé du cours...', 3, 6, '2025-01-15 08:00:00'),
+(2, 'Mathématiques Avancées', 'Cours de mathématiques niveau universitaire couvrant l\'algèbre linéaire', 'Contenu détaillé du cours...', 1, 7, '2025-01-15 08:30:00'),
+(3, 'Développement Web Full Stack', 'Formation complète sur le développement web moderne', 'Contenu détaillé du cours...', 3, 8, '2025-01-15 09:00:00');
 
 -- --------------------------------------------------------
 
@@ -117,7 +137,11 @@ CREATE TABLE `utilisateurs` (
 --
 
 INSERT INTO `utilisateurs` (`id`, `nom`, `email`, `password`, `role`, `status`, `date_creation`) VALUES
-(1, 'admin', 'admin@admin.com', '20252025', 'admin', 'actif', '2025-01-13 09:14:59');
+(1, 'admin', 'admin@admin.com', '20252025', 'admin', 'actif', '2025-01-13 09:14:59'),
+(4, 'fetti', 'fetti@gmail.com', '$2y$10$PFijC8lc2bD/rITZJ3/2huKIjJYc0erYL0XaSv8wrZiFDQTBvbo/C', 'etudiant', 'inactif', '2025-01-14 10:12:41'),
+(6, 'amine', 'amine@gmail.com', '$2y$10$RwBU2Q4QpVe6xlHxaVgbP.akWkDMBkWvPId8/HA.DBLCOT8l7VG3q', 'enseignant', 'actif', '2025-01-14 17:44:42'),
+(7, 'rachida', 'rachida@gmail.com', '$2y$10$hqV6XdxdlAizPruDXgc9iuqe8DvnINfzWHZY9F1cy60DQDPXKmaDm', 'enseignant', 'inactif', '2025-01-14 18:20:36'),
+(8, 'omar', 'omar@gmail.com', '$2y$10$wLCkPEKwgVGdhGkjO.wvc.hzr7P4xAGfBwR97zgOVPDyy65yEFAX.', 'enseignant', 'actif', '2025-01-14 18:35:12');
 
 --
 -- Indexes for dumped tables
@@ -135,8 +159,8 @@ ALTER TABLE `categories`
 --
 ALTER TABLE `cours`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `categorie_id` (`categorie_id`),
-  ADD KEY `enseignant_id` (`enseignant_id`);
+  ADD KEY `enseignant_id` (`enseignant_id`),
+  ADD KEY `categorie_id` (`categorie_id`);
 
 --
 -- Indexes for table `cours_tags`
@@ -181,7 +205,7 @@ ALTER TABLE `utilisateurs`
 -- AUTO_INCREMENT for table `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `cours`
@@ -211,7 +235,7 @@ ALTER TABLE `tags`
 -- AUTO_INCREMENT for table `utilisateurs`
 --
 ALTER TABLE `utilisateurs`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- Constraints for dumped tables
@@ -222,7 +246,10 @@ ALTER TABLE `utilisateurs`
 --
 ALTER TABLE `cours`
   ADD CONSTRAINT `cours_ibfk_1` FOREIGN KEY (`categorie_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `cours_ibfk_2` FOREIGN KEY (`enseignant_id`) REFERENCES `utilisateurs` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `cours_ibfk_2` FOREIGN KEY (`enseignant_id`) REFERENCES `utilisateurs` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `cours_ibfk_3` FOREIGN KEY (`enseignant_id`) REFERENCES `utilisateurs` (`id`),
+  ADD CONSTRAINT `cours_ibfk_4` FOREIGN KEY (`enseignant_id`) REFERENCES `utilisateurs` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `cours_ibfk_5` FOREIGN KEY (`categorie_id`) REFERENCES `categories` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `cours_tags`

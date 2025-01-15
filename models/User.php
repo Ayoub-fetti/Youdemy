@@ -9,8 +9,6 @@ class User {
     protected $role;
     protected $status;
     protected $date_creation;
-    
-
     public function __construct($pdo)
     {
         $this->pdo = $pdo;
@@ -79,6 +77,7 @@ class User {
         }
         return false;
     }
+
     public function register($nom, $email, $password, $role) {
         try {
             // VErifier si l'email existe dEjA
@@ -101,6 +100,7 @@ class User {
             return ['success' => false, 'message' => "Erreur lors de l'inscription: " . $e->getMessage()];
         }
     }
+
  
 }
 
