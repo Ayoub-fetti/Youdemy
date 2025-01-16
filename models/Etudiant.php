@@ -31,5 +31,28 @@ class Etudiant extends User {
             return ['success' => false, 'message' => 'Une erreur est survenue'];
         }
     }
+
+    // fonction pour afficher les cours de l'etudiant
+
+    public function getCoursInscrit() {
+        try {
+            $query = "SELECT c.*, u.nom as enseignant_nom, cat.nom as categorie_nom 
+                     FROM cours c 
+                     JOIN inscriptions i ON c.id = i.cours_id 
+                     JOIN utilisateurs u ON c.enseignant_id = u.id 
+                     JOIN categories cat ON c.categorie_id = cat.id
+                     WHERE i.etudiant_id = ?
+                     ORDER BY i.date_inscription DESC";
+            $stmt = $this->pdo->prepare($query);
+            $stmt->execute([$this->id]);
+                        
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            error_log("Nombre de résultats: " . count($result));
+            return $result;
+        } catch (PDOException $e) {
+            error_log("Exception PDO: " . $e->getMessage());
+            return [];
+        }
+    }
 }
 ?>

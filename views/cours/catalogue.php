@@ -58,6 +58,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cours_id']) && isset(
                 <h1 class="text-2xl font-semibold">
                     Les cours de <span class="text-purple-500">Youdemy</span>
                 </h1>
+                <?php if(isset($_SESSION['user_id'])): ?>
+                    <a href="../user/logout.php" class="bg-violet-500 hover:bg-violet-700 text-white text-sm px-3 py-1 rounded-md">
+                        <i class="fas fa-sign-out-alt mr-1"></i>Déconnexion
+                    </a>
+                <?php endif; ?>
             </header>
 
             <nav class="flex space-x-4 mb-6">
