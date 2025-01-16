@@ -69,6 +69,36 @@
                             throw new Exception("Erreur lors de l'enregistrement du cours.");
                         }
 
+                        // recuperer id du cours maintenant cree
+                        $cours_id = $pdo->lastInsertId();
+
+                        // Gestion des tags
+                        if (isset($_POST['tags']) && !empty($_POST['tags'])) {
+                            $tags = explode(',', $_POST['tags']);
+                            foreach ($tags as $tag_name) {
+                                $tag_name = trim($tag_name);
+                                if (!empty($tag_name)) {
+                                    // Vérifier si le tag existe déjà
+                                    $stmt = $pdo->prepare("SELECT id FROM tags WHERE nom = ?");
+                                    $stmt->execute([$tag_name]);
+                                    $tag = $stmt->fetch();
+
+                                    if (!$tag) {
+                                        // Créer le nouveau tag
+                                        $stmt = $pdo->prepare("INSERT INTO tags (nom) VALUES (?)");
+                                        $stmt->execute([$tag_name]);
+                                        $tag_id = $pdo->lastInsertId();
+                                    } else {
+                                        $tag_id = $tag['id'];
+                                    }
+
+                                    // Associer le tag au cours
+                                    $stmt = $pdo->prepare("INSERT INTO cours_tags (cours_id, tag_id) VALUES (?, ?)");
+                                    $stmt->execute([$cours_id, $tag_id]);
+                                }
+                            }
+                        }
+
                         $message = "Cours ajouté avec succès!";
                         header("Location: " . $_SERVER['PHP_SELF'] . "?success=1");
                         exit;
