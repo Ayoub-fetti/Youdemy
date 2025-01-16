@@ -13,7 +13,9 @@ if (!isset($_SESSION['user_id'])) {
 $etudiant = new Etudiant();
 $etudiant->setId($_SESSION['user_id']);
 $cours = $etudiant->getCoursInscrit();
-var_dump($cours);
+
+// var_dump($cours);
+// var_dump($etudiant);
 
 
 ?>

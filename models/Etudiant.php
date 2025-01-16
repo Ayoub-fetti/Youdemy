@@ -47,7 +47,6 @@ class Etudiant extends User {
             $stmt->execute([$this->id]);
                         
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            error_log("Nombre de résultats: " . count($result));
             return $result;
         } catch (PDOException $e) {
             error_log("Exception PDO: " . $e->getMessage());

@@ -28,6 +28,7 @@ class User {
             }
         }
     }
+    
 
     // getters 
     public function getId()  { return $this->id; }

@@ -10,10 +10,11 @@ $user = new User($pdo);
 $errors = [];
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $email = trim($_POST['email']);
+    $email = ($_POST['email']);
+    $email = filter_var($email, FILTER_SANITIZE_EMAIL); 
     $password = $_POST['password'];
 
-    // validation 
+   
     if (empty($email)) {
         $errors[] = 'Veuillez entrer votre adresse e-mail';
     }
@@ -27,19 +28,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_SESSION['user_nom'] = $user->getName();
             $_SESSION['user_role'] = $user->getRole();
             
-            // Check if user is inactive
+            // Check if etudiant is inactive
             if ($user->getRole() === 'etudiant' && $user->getstatus() === 'inactif') {
                 header('Location: ../Confirmation/inactif.php');
                 exit();
             }
             
-            // Check if user is an inactive instructor
+            // Check if enseignants is an inactive instructor
             if ($user->getRole() === 'enseignant' && $user->getstatus() === 'inactif') {
                 header('Location: ../Confirmation/verification.php');
                 exit();
             }
             
-            // redirection vers le role 
+   
             switch($user->getRole()) {
                 case 'admin':
                     header('Location: ../admin/dashbord.php');
