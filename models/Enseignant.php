@@ -43,7 +43,7 @@ class Enseignant extends User {
                 $categorie_id = $_POST['categorie_id'];
                 $type_cours = $_POST['type_cours'];
 
-                // Créer l'instance appropriée selon le type de cours
+                // Creer l'instance appropriee selon le type de cours
                 if ($type_cours === 'pdf' && isset($_FILES['fichier_pdf'])) {
                     $fichier = $_FILES['fichier_pdf'];
                     $dossier_upload = __DIR__ . '/../uploads/pdf/';
@@ -83,32 +83,34 @@ class Enseignant extends User {
 
                 $cours_id = $this->db->lastInsertId();
 
-                // Gérer les tags si présents
+                // Gerer les tags si il y a des tags 
                 if (isset($_POST['tags']) && !empty($_POST['tags'])) {
                     $tags = explode(',', $_POST['tags']);
                     foreach ($tags as $tag_name) {
                         $tag_name = trim($tag_name);
                         if (!empty($tag_name)) {
-                            // Vérifier si le tag existe déjà
-                            $stmt = $this->db->prepare("SELECT id FROM tags WHERE nom = ?");
+                            
+                            
+                            $stmt = $this->db->prepare("SELECT id FROM tags WHERE nom = ?"); // verifier si le tag existe deja
                             $stmt->execute([$tag_name]);
                             $tag = $stmt->fetch();
                             
                             if (!$tag) {
-                                // Créer le nouveau tag
-                                $stmt = $this->db->prepare("INSERT INTO tags (nom) VALUES (?)");
+                                
+                                $stmt = $this->db->prepare("INSERT INTO tags (nom) VALUES (?)"); // creer le nouveau tag
                                 $stmt->execute([$tag_name]);
                                 $tag_id = $this->db->lastInsertId();
                             } else {
                                 $tag_id = $tag['id'];
                             }
                             
-                            // Associer le tag au cours
-                            $stmt = $this->db->prepare("INSERT INTO cours_tags (cours_id, tag_id) VALUES (?, ?)");
+                            
+                            $stmt = $this->db->prepare("INSERT INTO cours_tags (cours_id, tag_id) VALUES (?, ?)"); 
                             $stmt->execute([$cours_id, $tag_id]);
                         }
                     }
                 }
+                
 
                 $this->db->commit();
                 header('Location: /views/enseignant/enseignant_dash.php?success=1');

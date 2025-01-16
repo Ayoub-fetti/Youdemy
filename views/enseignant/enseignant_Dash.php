@@ -15,6 +15,10 @@
     $enseignant_id = $_SESSION['user_id'];
     $message = '';
 
+    // Check for success message from URL
+    if (isset($_GET['success']) && $_GET['success'] == '1') {
+        $message = "Le cours a été ajouté avec succès !";
+    }
 
     
                 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
