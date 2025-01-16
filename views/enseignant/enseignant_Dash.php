@@ -2,6 +2,7 @@
     require_once __DIR__ . '/../../models/CoursPDF.php';
     require_once __DIR__ . '/../../models/CoursVideo.php';
     require_once __DIR__ . '/../../config/database.php';
+    require_once __DIR__ . '/../../models/Enseignant.php';
 
     $database = new Database();
     $pdo = $database->connect();
@@ -72,31 +73,11 @@
                         // recuperer id du cours maintenant cree
                         $cours_id = $pdo->lastInsertId();
 
-                        // Gestion des tags
+                        // Handle tags
                         if (isset($_POST['tags']) && !empty($_POST['tags'])) {
                             $tags = explode(',', $_POST['tags']);
-                            foreach ($tags as $tag_name) {
-                                $tag_name = trim($tag_name);
-                                if (!empty($tag_name)) {
-                                    // Vérifier si le tag existe déjà
-                                    $stmt = $pdo->prepare("SELECT id FROM tags WHERE nom = ?");
-                                    $stmt->execute([$tag_name]);
-                                    $tag = $stmt->fetch();
-
-                                    if (!$tag) {
-                                        // Créer le nouveau tag
-                                        $stmt = $pdo->prepare("INSERT INTO tags (nom) VALUES (?)");
-                                        $stmt->execute([$tag_name]);
-                                        $tag_id = $pdo->lastInsertId();
-                                    } else {
-                                        $tag_id = $tag['id'];
-                                    }
-
-                                    // Associer le tag au cours
-                                    $stmt = $pdo->prepare("INSERT INTO cours_tags (cours_id, tag_id) VALUES (?, ?)");
-                                    $stmt->execute([$cours_id, $tag_id]);
-                                }
-                            }
+                            $enseignant = new Enseignant(); // Assuming you have an instance of Enseignant
+                            $enseignant->handleTags($cours_id, $tags);
                         }
 
                         $message = "Cours ajouté avec succès!";
@@ -233,23 +214,18 @@ $categories = $stmt_categories->fetchAll(PDO::FETCH_ASSOC);
                             <td class="px-4 py-3 text-sm text-gray-900"><?php echo htmlspecialchars($cours['type']); ?></td>
                             <td class="px-4 py-3 text-sm text-gray-900">
                                 <?php if ($cours['type'] === 'pdf'): ?>
-                                    <a href="<?php echo htmlspecialchars($cours['contenu']); ?>" target="_blank" class="text-indigo-600 hover:text-indigo-900">
-                                        Voir le PDF
-                                    </a>
+                                    <a href="<?php echo htmlspecialchars($cours['contenu']); ?>" target="_blank" class="text-indigo-600 hover:text-indigo-900">Voir le PDF</a>
                                 <?php else: ?>
-                                    <a href="<?php echo htmlspecialchars($cours['contenu']); ?>" target="_blank" class="text-indigo-600 hover:text-indigo-900">
-                                        Voir la vidéo
-                                    </a>
+                                    <a href="<?php echo htmlspecialchars($cours['contenu']); ?>" target="_blank" class="text-indigo-600 hover:text-indigo-900">Voir la vidéo</a>
                                 <?php endif; ?>
                             </td>
                             <td class="px-4 py-3 text-sm text-gray-900"><?php echo htmlspecialchars($cours['date_creation']); ?></td>
                             <td class="px-4 py-3 text-sm text-gray-900">
-                                <a href="edit_cours.php?id=<?php echo $cours['id']; ?>" class="text-indigo-600 hover:text-indigo-900">
-                                    Modifier
-                                </a>
-                                <a href="delete_cours.php?id=<?php echo $cours['id']; ?>" class="text-red-600 hover:text-red-900" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce cours?')">
-                                    Supprimer
-                                </a>
+                                <a href="edit_course.php?id=<?php echo $cours['id']; ?>" class="text-indigo-600 hover:text-indigo-900">Modifier</a>
+                                <form action="delete_course.php" method="POST" style="display:inline;">
+                                    <input type="hidden" name="id" value="<?php echo $cours['id']; ?>">
+                                    <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce cours?')">Supprimer</button>
+                                </form>
                             </td>
                         </tr>
                         <?php endforeach; ?>

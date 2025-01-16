@@ -86,25 +86,7 @@ class Enseignant extends User {
                 // Gerer les tags si il y a des tags 
                 if (isset($_POST['tags']) && !empty($_POST['tags'])) {
                     $tags = explode(',', $_POST['tags']);
-                    $unique_tags = [];
-                    foreach ($tags as $tag_name) {
-                        $tag_name = strtolower(trim($tag_name)); // Normalize tag name
-                        if (!empty($tag_name) && !in_array($tag_name, $unique_tags)) {
-                            $unique_tags[] = $tag_name; // Add to unique tags
-                            $stmt = $this->db->prepare("SELECT id FROM tags WHERE nom = ?");
-                            $stmt->execute([$tag_name]);
-                            $tag = $stmt->fetch();
-                            if (!$tag) {
-                                $stmt = $this->db->prepare("INSERT INTO tags (nom) VALUES (?)");
-                                $stmt->execute([$tag_name]);
-                                $tag_id = $this->db->lastInsertId();
-                            } else {
-                                $tag_id = $tag['id'];
-                            }
-                            $stmt = $this->db->prepare("INSERT INTO cours_tags (cours_id, tag_id) VALUES (?, ?)");
-                            $stmt->execute([$cours_id, $tag_id]);
-                        }
-                    }
+                    $this->handleTags($cours_id, $tags);
                 }
                 
 
@@ -196,5 +178,25 @@ class Enseignant extends User {
 
     public function getDeleteCoursUrl($cours_id) {
         return "/controllers/cours/supprimer_cours.php?id=" . $cours_id;
+    }
+
+    public function handleTags($cours_id, $tags) {
+        foreach ($tags as $tag_name) {
+            $tag_name = strtolower(trim($tag_name)); // Normalize tag name
+            if (!empty($tag_name)) {
+                $stmt = $this->db->prepare("SELECT id FROM tags WHERE nom = ?");
+                $stmt->execute([$tag_name]);
+                $tag = $stmt->fetch();
+                if (!$tag) {
+                    $stmt = $this->db->prepare("INSERT INTO tags (nom) VALUES (?)");
+                    $stmt->execute([$tag_name]);
+                    $tag_id = $this->db->lastInsertId();
+                } else {
+                    $tag_id = $tag['id'];
+                }
+                $stmt = $this->db->prepare("INSERT INTO cours_tags (cours_id, tag_id) VALUES (?, ?)");
+                $stmt->execute([$cours_id, $tag_id]);
+            }
+        }
     }
 }
