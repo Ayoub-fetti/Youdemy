@@ -9,6 +9,7 @@ class User {
     protected $role;
     protected $status;
     protected $date_creation;
+    
 
     public function __construct($pdo)
     {
@@ -28,7 +29,6 @@ class User {
             }
         }
     }
-    
 
     // getters 
     public function getId()  { return $this->id; }
@@ -39,7 +39,6 @@ class User {
     public function getDate_creation() { return $this->date_creation; }
 
     // setters 
-    public function setId($id) { $this->id = $id; }
     public function setName($nom) { $this->nom = $nom; }
     public function setEmail($email) { $this->email = $email; }
     public function setRole($role) { $this->role = $role; }
@@ -80,7 +79,6 @@ class User {
         }
         return false;
     }
-
     public function register($nom, $email, $password, $role) {
         try {
             // VErifier si l'email existe dEjA
@@ -103,7 +101,6 @@ class User {
             return ['success' => false, 'message' => "Erreur lors de l'inscription: " . $e->getMessage()];
         }
     }
-
  
 }
 

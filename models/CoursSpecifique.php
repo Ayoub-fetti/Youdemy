@@ -32,4 +32,18 @@ abstract class CoursSpecifique {
     
     abstract public function getType();
     abstract public function getContenu();
+
+    public function save($pdo) {
+        $query = "INSERT INTO cours (titre, description, contenu, categorie_id, enseignant_id) 
+                VALUES (:titre, :description, :contenu, :categorie_id, :enseignant_id)";
+        
+        $stmt = $pdo->prepare($query);
+        return $stmt->execute([
+            ':titre' => $this->getTitre(),
+            ':description' => $this->getDescription(),
+            ':contenu' => $this->getContenu(),
+            ':categorie_id' => $this->getCategorieId(),
+            ':enseignant_id' => $this->getEnseignantId()
+        ]);
+    }
 }

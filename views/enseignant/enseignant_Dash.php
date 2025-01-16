@@ -101,41 +101,39 @@ $categories = $stmt_categories->fetchAll(PDO::FETCH_ASSOC);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tableau de bord Enseignant</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-gray-100">
     
-    <div class="container mt-5">
-        <h1>Tableau de bord Enseignant</h1>
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">Tableau de bord Enseignant</h1>
         
         <?php if (!empty($message)): ?>
-            <div class="alert <?php echo strpos($message, 'Erreur') === false ? 'alert-success' : 'alert-danger'; ?>">
+            <div class="p-4 mb-4 rounded-lg <?php echo strpos($message, 'Erreur') === false ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'; ?>">
                 <?php echo htmlspecialchars($message); ?>
             </div>
         <?php endif; ?>
         
         <!-- Formulaire d'ajout de cours -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h2>Ajouter un nouveau cours</h2>
+        <div class="bg-white rounded-lg shadow-md mb-8">
+            <div class="border-b border-gray-200 p-4">
+                <h2 class="text-xl font-semibold text-gray-800">Ajouter un nouveau cours</h2>
             </div>
-            <div class="card-body">
-                
+            <div class="p-6">
                 <form method="POST" enctype="multipart/form-data">
-                    <div class="mb-3">
-                        <label for="titre" class="form-label">Titre</label>
-                        <input type="text" class="form-control" id="titre" name="titre" required>
+                    <div class="mb-4">
+                        <label for="titre" class="block text-sm font-medium text-gray-700 mb-1">Titre</label>
+                        <input type="text" class="w-full rounded-md bg-white border-2 border-black shadow-sm focus:border-black focus:ring-black" id="titre" name="titre" required>
                     </div>
                     
-                    <div class="mb-3">
-                        <label for="description" class="form-label">Description</label>
-                        <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                    <div class="mb-4">
+                        <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <textarea class="w-full rounded-md bg-white border-2 border-black shadow-sm focus:border-black focus:ring-black" id="description" name="description" rows="3" required></textarea>
                     </div>
                     
-                    <div class="mb-3">
-                        <label for="categorie_id" class="form-label">Catégorie</label>
-
-                        <select class="form-control" id="categorie_id" name="categorie_id" required>
+                    <div class="mb-4">
+                        <label for="categorie_id" class="block text-sm font-medium text-gray-700 mb-1">Catégorie</label>
+                        <select class="w-full rounded-md bg-white border-2 border-black shadow-sm focus:border-black focus:ring-black" id="categorie_id" name="categorie_id" required>
                             <option value="">Sélectionner une catégorie</option>
                             <?php foreach ($categories as $categorie): ?>
                                 <option value="<?php echo htmlspecialchars($categorie['id']); ?>">
@@ -145,81 +143,87 @@ $categories = $stmt_categories->fetchAll(PDO::FETCH_ASSOC);
                         </select>
                     </div>
                     
-                    <div class="mb-3">
-                        <label for="type_cours" class="form-label">Type de cours</label>
-                        <select class="form-control" id="type_cours" name="type_cours" required>
+                    <div class="mb-4">
+                        <label for="type_cours" class="block text-sm font-medium text-gray-700 mb-1">Type de cours</label>
+                        <select class="w-full rounded-md bg-white border-2 border-black shadow-sm focus:border-black focus:ring-black" id="type_cours" name="type_cours" required>
                             <option value="">Sélectionner un type</option>
                             <option value="pdf">PDF</option>
                             <option value="video">Vidéo</option>
                         </select>
                     </div>
                     
-                    <div id="pdf_upload" class="mb-3" style="display: none;">
-                        <label for="fichier_pdf" class="form-label">Fichier PDF</label>
-                        <input type="file" class="form-control" id="fichier_pdf" name="fichier_pdf" accept=".pdf">
+                    <div id="pdf_upload" class="mb-4 hidden">
+                        <label for="fichier_pdf" class="block text-sm font-medium text-gray-700 mb-1">Fichier PDF</label>
+                        <input type="file" class="w-full rounded-md bg-white border-2 border-black shadow-sm focus:border-black focus:ring-black" id="fichier_pdf" name="fichier_pdf" accept=".pdf">
                     </div>
                     
-                    <div id="video_url" class="mb-3" style="display: none;">
-                        <label for="url_video" class="form-label">URL de la vidéo</label>
-                        <input type="url" class="form-control" id="url_video" name="url_video">
+                    <div id="video_url" class="mb-4 hidden">
+                        <label for="url_video" class="block text-sm font-medium text-gray-700 mb-1">URL de la vidéo</label>
+                        <input type="url" class="w-full rounded-md bg-white border-2 border-black shadow-sm focus:border-black focus:ring-black" id="url_video" name="url_video">
                     </div>
                     
-                    <div class="mb-3">
-                        <label for="tags" class="form-label">Tags (séparés par des virgules)</label>
-                        <input type="text" class="form-control" id="tags" name="tags">
+                    <div class="mb-4">
+                        <label for="tags" class="block text-sm font-medium text-gray-700 mb-1">Tags (séparés par des virgules)</label>
+                        <input type="text" class="w-full rounded-md bg-white border-2 border-black shadow-sm focus:border-black focus:ring-black" id="tags" name="tags">
                     </div>
                     
-                    <button type="submit" class="btn btn-primary">Ajouter le cours</button>
+                    <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                        Ajouter le cours
+                    </button>
                 </form>
             </div>
         </div>
         
         <!-- Liste des cours -->
-        <div class="card">
-            <div class="card-header">
-                <h2>Mes cours</h2>
+        <div class="bg-white rounded-lg shadow-md">
+            <div class="border-b border-gray-200 p-4">
+                <h2 class="text-xl font-semibold text-gray-800">Mes cours</h2>
             </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Titre</th>
-                                <th>Description</th>
-                                <th>Type</th>
-                                <th>Contenu</th>
-                                <th>Date de création</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($cours_list as $cours): ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($cours['titre']); ?></td>
-                                <td><?php echo htmlspecialchars($cours['description']); ?></td>
-                                <td><?php echo htmlspecialchars($cours['type']); ?></td>
-                                <td>
-                                    <?php if ($cours['type'] === 'pdf'): ?>
-                                        <a href="<?php echo htmlspecialchars($cours['contenu']); ?>" target="_blank" class="btn btn-sm btn-info">Voir le PDF</a>
-                                    <?php else: ?>
-                                        <a href="<?php echo htmlspecialchars($cours['contenu']); ?>" target="_blank" class="btn btn-sm btn-info">Voir la vidéo</a>
-                                    <?php endif; ?>
-                                </td>
-                                <td><?php echo htmlspecialchars($cours['date_creation']); ?></td>
-                                <td>
-                                    <a href="edit_cours.php?id=<?php echo $cours['id']; ?>" class="btn btn-sm btn-primary">Modifier</a>
-                                    <a href="delete_cours.php?id=<?php echo $cours['id']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce cours?')">Supprimer</a>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
+            <div class="p-6">
+                <table class="w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="w-1/6 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Titre</th>
+                            <th class="w-2/6 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
+                            <th class="w-1/6 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                            <th class="w-1/6 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contenu</th>
+                            <th class="w-1/6 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <?php foreach ($cours_list as $cours): ?>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-3 text-sm text-gray-900 truncate"><?php echo htmlspecialchars($cours['titre']); ?></td>
+                            <td class="px-4 py-3 text-sm text-gray-900 truncate"><?php echo htmlspecialchars($cours['description']); ?></td>
+                            <td class="px-4 py-3 text-sm text-gray-900"><?php echo htmlspecialchars($cours['type']); ?></td>
+                            <td class="px-4 py-3 text-sm text-gray-900">
+                                <?php if ($cours['type'] === 'pdf'): ?>
+                                    <a href="<?php echo htmlspecialchars($cours['contenu']); ?>" target="_blank" class="text-indigo-600 hover:text-indigo-900">
+                                        Voir le PDF
+                                    </a>
+                                <?php else: ?>
+                                    <a href="<?php echo htmlspecialchars($cours['contenu']); ?>" target="_blank" class="text-indigo-600 hover:text-indigo-900">
+                                        Voir la vidéo
+                                    </a>
+                                <?php endif; ?>
+                            </td>
+                            <td class="px-4 py-3 text-sm text-gray-900"><?php echo htmlspecialchars($cours['date_creation']); ?></td>
+                            <td class="px-4 py-3 text-sm text-gray-900">
+                                <a href="edit_cours.php?id=<?php echo $cours['id']; ?>" class="text-indigo-600 hover:text-indigo-900">
+                                    Modifier
+                                </a>
+                                <a href="delete_cours.php?id=<?php echo $cours['id']; ?>" class="text-red-600 hover:text-red-900" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce cours?')">
+                                    Supprimer
+                                </a>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
         document.getElementById('type_cours').addEventListener('change', function() {
@@ -227,18 +231,18 @@ $categories = $stmt_categories->fetchAll(PDO::FETCH_ASSOC);
             const videoUrl = document.getElementById('video_url');
             
             if (this.value === 'pdf') {
-                pdfUpload.style.display = 'block';
-                videoUrl.style.display = 'none';
+                pdfUpload.classList.remove('hidden');
+                videoUrl.classList.add('hidden');
                 document.getElementById('fichier_pdf').required = true;
                 document.getElementById('url_video').required = false;
             } else if (this.value === 'video') {
-                pdfUpload.style.display = 'none';
-                videoUrl.style.display = 'block';
+                pdfUpload.classList.add('hidden');
+                videoUrl.classList.remove('hidden');
                 document.getElementById('fichier_pdf').required = false;
                 document.getElementById('url_video').required = true;
             } else {
-                pdfUpload.style.display = 'none';
-                videoUrl.style.display = 'none';
+                pdfUpload.classList.add('hidden');
+                videoUrl.classList.add('hidden');
                 document.getElementById('fichier_pdf').required = false;
                 document.getElementById('url_video').required = false;
             }

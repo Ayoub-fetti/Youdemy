@@ -10,16 +10,34 @@ class Enseignant extends User {
     private $description;
     private $db;
 
-    public function __construct($id = null) {
-        parent::__construct($id);
-        $database = new Database();
-        $this->db = $database->connect();
+    public function __construct($id = null, $pdo = null) {
+        if ($pdo === null) {
+            $database = new Database();
+            $pdo = $database->connect();
+        }
+        $this->db = $pdo;
+        
+        if ($id !== null) {
+            $this->id = $id;
+            $stmt = $this->db->prepare("SELECT * FROM utilisateurs WHERE id = ?");
+            $stmt->execute([$id]);
+            $user = $stmt->fetch();
+            if ($user) {
+                $this->nom = $user['nom'];
+                $this->email = $user['email'];
+                $this->role = $user['role'];
+                $this->status = $user['status'];
+                $this->date_creation = $user['date_creation'];
+            }
+        }
     }
 
     // Fonction pour ajouter un cours avec polymorphisme
     public function ajouterCours() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
+                $this->db->beginTransaction();
+
                 $titre = $_POST['titre'];
                 $description = $_POST['description'];
                 $categorie_id = $_POST['categorie_id'];
@@ -50,12 +68,54 @@ class Enseignant extends User {
                     throw new Exception("Type de cours invalide ou données manquantes");
                 }
 
-                // Sauvegarder le cours dans la base de données
-                $this->sauvegarderCours($cours);
+                // Sauvegarder le cours
+                $query = "INSERT INTO cours (titre, description, contenu, categorie_id, enseignant_id) 
+                         VALUES (:titre, :description, :contenu, :categorie_id, :enseignant_id)";
                 
+                $stmt = $this->db->prepare($query);
+                $stmt->execute([
+                    ':titre' => $cours->getTitre(),
+                    ':description' => $cours->getDescription(),
+                    ':contenu' => $cours->getContenu(),
+                    ':categorie_id' => $cours->getCategorieId(),
+                    ':enseignant_id' => $cours->getEnseignantId()
+                ]);
+
+                $cours_id = $this->db->lastInsertId();
+
+                // Gérer les tags si présents
+                if (isset($_POST['tags']) && !empty($_POST['tags'])) {
+                    $tags = explode(',', $_POST['tags']);
+                    foreach ($tags as $tag_name) {
+                        $tag_name = trim($tag_name);
+                        if (!empty($tag_name)) {
+                            // Vérifier si le tag existe déjà
+                            $stmt = $this->db->prepare("SELECT id FROM tags WHERE nom = ?");
+                            $stmt->execute([$tag_name]);
+                            $tag = $stmt->fetch();
+                            
+                            if (!$tag) {
+                                // Créer le nouveau tag
+                                $stmt = $this->db->prepare("INSERT INTO tags (nom) VALUES (?)");
+                                $stmt->execute([$tag_name]);
+                                $tag_id = $this->db->lastInsertId();
+                            } else {
+                                $tag_id = $tag['id'];
+                            }
+                            
+                            // Associer le tag au cours
+                            $stmt = $this->db->prepare("INSERT INTO cours_tags (cours_id, tag_id) VALUES (?, ?)");
+                            $stmt->execute([$cours_id, $tag_id]);
+                        }
+                    }
+                }
+
+                $this->db->commit();
                 header('Location: /views/enseignant/enseignant_dash.php?success=1');
                 exit();
             } catch (Exception $e) {
+                $this->db->rollBack();
+                error_log("Erreur lors de l'ajout du cours: " . $e->getMessage());
                 header('Location: /views/enseignant/enseignant_dash.php?error=' . urlencode($e->getMessage()));
                 exit();
             }
@@ -66,24 +126,25 @@ class Enseignant extends User {
         try {
             $this->db->beginTransaction();
             
-            $query = "INSERT INTO cours (titre, description, contenu, type, categorie_id, enseignant_id) 
-                     VALUES (:titre, :description, :contenu, :type, :categorie_id, :enseignant_id)";
+            $query = "INSERT INTO cours (titre, description, contenu, categorie_id, enseignant_id) 
+                     VALUES (:titre, :description, :contenu, :categorie_id, :enseignant_id)";
             
             $stmt = $this->db->prepare($query);
             $stmt->execute([
                 ':titre' => $cours->getTitre(),
                 ':description' => $cours->getDescription(),
                 ':contenu' => $cours->getContenu(),
-                ':type' => $cours->getType(),
                 ':categorie_id' => $cours->getCategorieId(),
-                ':enseignant_id' => $this->getId()
+                ':enseignant_id' => $cours->getEnseignantId()
             ]);
-            
+
+            $cours_id = $this->db->lastInsertId();
             $this->db->commit();
-            return $this->db->lastInsertId();
+            return $cours_id;
+
         } catch (Exception $e) {
             $this->db->rollBack();
-            throw new Exception("Erreur lors de la sauvegarde du cours: " . $e->getMessage());
+            throw $e;
         }
     }
 
