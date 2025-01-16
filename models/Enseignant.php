@@ -86,26 +86,22 @@ class Enseignant extends User {
                 // Gerer les tags si il y a des tags 
                 if (isset($_POST['tags']) && !empty($_POST['tags'])) {
                     $tags = explode(',', $_POST['tags']);
+                    $unique_tags = [];
                     foreach ($tags as $tag_name) {
-                        $tag_name = trim($tag_name);
-                        if (!empty($tag_name)) {
-                            
-                            
-                            $stmt = $this->db->prepare("SELECT id FROM tags WHERE nom = ?"); // verifier si le tag existe deja
+                        $tag_name = strtolower(trim($tag_name)); // Normalize tag name
+                        if (!empty($tag_name) && !in_array($tag_name, $unique_tags)) {
+                            $unique_tags[] = $tag_name; // Add to unique tags
+                            $stmt = $this->db->prepare("SELECT id FROM tags WHERE nom = ?");
                             $stmt->execute([$tag_name]);
                             $tag = $stmt->fetch();
-                            
                             if (!$tag) {
-                                
-                                $stmt = $this->db->prepare("INSERT INTO tags (nom) VALUES (?)"); // creer le nouveau tag
+                                $stmt = $this->db->prepare("INSERT INTO tags (nom) VALUES (?)");
                                 $stmt->execute([$tag_name]);
                                 $tag_id = $this->db->lastInsertId();
                             } else {
                                 $tag_id = $tag['id'];
                             }
-                            
-                            
-                            $stmt = $this->db->prepare("INSERT INTO cours_tags (cours_id, tag_id) VALUES (?, ?)"); 
+                            $stmt = $this->db->prepare("INSERT INTO cours_tags (cours_id, tag_id) VALUES (?, ?)");
                             $stmt->execute([$cours_id, $tag_id]);
                         }
                     }
