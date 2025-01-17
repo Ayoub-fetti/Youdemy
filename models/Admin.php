@@ -25,17 +25,39 @@ class Admin extends User {
     }
 
     // fonctions  pour calculer le total des cours
-    
     public function totalCours(){
-        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM COURS");
+        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM cours");
         $stmt->execute();
         return $stmt->fetchColumn();
     }
 
+    // obtenir la repartition des cours par categorie
+    public function getCoursParCategorie() {
+        $stmt = $this->pdo->prepare("SELECT cat.nom as categorie, COUNT(c.id) as count  FROM cours c  JOIN categories cat ON c.categorie_id = cat.id
+            GROUP BY cat.id, cat.nom ORDER BY count DESC");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // le cours le plus populaire
+    public function getCoursLePlusPopulaire() {
+        $stmt = $this->pdo->prepare("SELECT c.titre, COUNT(i.etudiant_id) as nb_etudiants FROM cours c LEFT JOIN inscriptions i ON c.id = i.cours_id
+            GROUP BY c.id, c.titre ORDER BY nb_etudiants DESC LIMIT 1");
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    // obtenir les top enseignants
+    public function getTopEnseignants($limit = 3) {
+        $stmt = $this->pdo->prepare("SELECT u.nom, COUNT(c.id) as nb_cours FROM utilisateurs u JOIN cours c ON u.id = c.enseignant_id
+            WHERE u.role = 'enseignant' GROUP BY u.id, u.nom ORDER BY nb_cours DESC LIMIT :limit");
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
     // fonction pour supprimer un utilisateur
     public function deleteUser($id) {
-     
          $stmt = $this->pdo->prepare("DELETE FROM utilisateurs WHERE id = :id");
         $stmt->execute(['id' => $id]);
         return $stmt->fetchColumn();
@@ -57,5 +79,4 @@ class Admin extends User {
 
         return $newStatus;
     }
-
 }

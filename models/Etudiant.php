@@ -34,8 +34,7 @@ class Etudiant extends User {
 
     public function getCoursInscrit() {
         try {
-            $query = "SELECT c.*, u.nom as enseignant_nom, cat.nom as categorie_nom 
-                     FROM cours c 
+            $query = "SELECT c.*, u.nom as enseignant_nom, cat.nom as categorie_nom FROM cours c 
                      JOIN inscriptions i ON c.id = i.cours_id 
                      JOIN utilisateurs u ON c.enseignant_id = u.id 
                      JOIN categories cat ON c.categorie_id = cat.id

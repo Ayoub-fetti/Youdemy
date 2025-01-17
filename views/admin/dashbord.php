@@ -80,7 +80,7 @@ if (isset($_POST['delete_user'])) {
       <i class="fas fa-file-alt">
       </i>
       <span class="ml-2">
-       Content
+       Cours
       </span>
      </a>
      <a class="flex items-center px-4 py-2 mt-2 text-gray-600 hover:bg-gray-100" href="statistique.php">
@@ -88,27 +88,6 @@ if (isset($_POST['delete_user'])) {
       </i>
       <span class="ml-2">
        Analytics
-      </span>
-     </a>
-     <a class="flex items-center px-4 py-2 mt-2 text-gray-600 hover:bg-gray-100" href="#">
-      <i class="fas fa-thumbs-up">
-      </i>
-      <span class="ml-2">
-       Likes
-      </span>
-     </a>
-     <a class="flex items-center px-4 py-2 mt-2 text-gray-600 hover:bg-gray-100" href="#">
-      <i class="fas fa-comments">
-      </i>
-      <span class="ml-2">
-       Comments
-      </span>
-     </a>
-     <a class="flex items-center px-4 py-2 mt-2 text-gray-600 hover:bg-gray-100" href="#">
-      <i class="fas fa-share">
-      </i>
-      <span class="ml-2">
-       Share
       </span>
      </a>
      <a class="flex items-center px-4 py-2 mt-2 text-gray-600 hover:bg-red-200" href="../user/logout.php">
