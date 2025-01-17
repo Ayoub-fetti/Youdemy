@@ -85,7 +85,7 @@ class Enseignant extends User {
 
                 // Gerer les tags si il y a des tags 
                 if (isset($_POST['tags']) && !empty($_POST['tags'])) {
-                    $tags = explode(',', $_POST['tags']);
+                    $tags = explode(',', $_POST['tags']);  // pour le vergule entre les tags 
                     $this->handleTags($cours_id, $tags);
                 }
                 
@@ -172,12 +172,89 @@ class Enseignant extends User {
         return $result ? $result['nom'] : '';
     }
 
-    public function getModifyCoursUrl($cours_id) {
-        return "/views/cours/modifier.php?id=" . $cours_id;
-    }
+    // fonction pour modifier le cours par l'enseignant
+    public function modifierCours($cours_id) {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            try {
+                $this->db->beginTransaction();
 
-    public function getDeleteCoursUrl($cours_id) {
-        return "/controllers/cours/supprimer_cours.php?id=" . $cours_id;
+                $titre = $_POST['titre'];
+                $description = $_POST['description'];
+                $categorie_id = $_POST['categorie_id'];
+                $type_cours = $_POST['type_cours'];
+
+                // Verifier si le cours appartient a l'enseignant
+                $stmt = $this->db->prepare("SELECT * FROM cours WHERE id = ? AND enseignant_id = ?");
+                $stmt->execute([$cours_id, $this->getId()]);
+                $cours = $stmt->fetch();
+
+                if (!$cours) {
+                    throw new Exception("Cours non trouvé ou vous n'avez pas les droits pour le modifier");
+                }
+
+                // modifier des informations de base
+                $query = "UPDATE cours SET titre = :titre, description = :description, categorie_id = :categorie_id";
+                $params = [
+                    ':titre' => $titre,
+                    ':description' => $description,
+                    ':categorie_id' => $categorie_id,
+                    ':id' => $cours_id
+                ];
+
+                // Gestion du contenu selon le type
+                if ($type_cours === 'pdf' && isset($_FILES['fichier_pdf']) && $_FILES['fichier_pdf']['size'] > 0) {
+                    $fichier = $_FILES['fichier_pdf'];
+                    $dossier_upload = __DIR__ . '/../uploads/pdf/';
+                    
+                    if (!file_exists($dossier_upload)) {
+                        mkdir($dossier_upload, 0777, true);
+                    }
+
+                    $extension = pathinfo($fichier['name'], PATHINFO_EXTENSION);
+                    $nom_fichier = uniqid() . '.' . $extension;
+                    $chemin_fichier = $dossier_upload . $nom_fichier;
+
+                    if (move_uploaded_file($fichier['tmp_name'], $chemin_fichier)) {
+                        $query .= ", contenu = :contenu";
+                        $params[':contenu'] = '/uploads/pdf/' . $nom_fichier;
+                        
+                        // Supprimer l'ancien fichier PDF si il existe
+                        if ($cours['contenu'] && file_exists(__DIR__ . '/..' . $cours['contenu'])) {
+                            unlink(__DIR__ . '/..' . $cours['contenu']);
+                        }
+                    }
+                } elseif ($type_cours === 'video' && !empty($_POST['url_video'])) {
+                    $query .= ", contenu = :contenu";
+                    $params[':contenu'] = $_POST['url_video'];
+                }
+
+                $query .= " WHERE id = :id";
+                $stmt = $this->db->prepare($query);
+                $stmt->execute($params);
+
+                // Mise à jour des tags
+                if (isset($_POST['tags'])) {
+                    // Supprimer les anciens tags
+                    $stmt = $this->db->prepare("DELETE FROM cours_tags WHERE cours_id = ?");
+                    $stmt->execute([$cours_id]);
+
+                    // Ajouter les nouveaux tags
+                    if (!empty($_POST['tags'])) {
+                        $tags = explode(',', $_POST['tags']);
+                        $this->handleTags($cours_id, $tags);
+                    }
+                }
+
+                $this->db->commit();
+                header('Location: /Youdemy/views/enseignant/enseignant_dash.php?edit_success=1');
+                exit();
+            } catch (Exception $e) {
+                $this->db->rollBack();
+                error_log("Erreur lors de la modification du cours: " . $e->getMessage());
+                header('Location: /Youdemy/views/enseignant/edit_course.php?id=' . $cours_id . '&error=' . urlencode($e->getMessage()));
+                exit();
+            }
+        }
     }
 
     public function handleTags($cours_id, $tags) {

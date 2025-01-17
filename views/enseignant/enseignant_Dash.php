@@ -19,94 +19,97 @@
     // Check for success message from URL
     if (isset($_GET['success']) && $_GET['success'] == '1') {
         $message = "Le cours a été ajouté avec succès !";
+    } elseif (isset($_GET['edit_success']) && $_GET['edit_success'] == '1') {
+        $message = "Le cours a été modifié avec succès !";
     }
 
     
-                if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                    try {
-                        $titre = $_POST['titre'];
-                        $description = $_POST['description'];
-                        $categorie_id = $_POST['categorie_id'];
-                        $type_cours = $_POST['type_cours'];
-                        $enseignant_id = $_SESSION['user_id'];
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            try {
+                $titre = $_POST['titre'];
+                $description = $_POST['description'];
+                $categorie_id = $_POST['categorie_id'];
+                $type_cours = $_POST['type_cours'];
+                $enseignant_id = $_SESSION['user_id'];
 
-                        if ($type_cours === 'pdf') {
-                            if (!isset($_FILES["fichier_pdf"]) || $_FILES["fichier_pdf"]["error"] !== UPLOAD_ERR_OK) {
-                                throw new Exception("Erreur : Veuillez sélectionner un fichier PDF valide.");
-                            }
-
-                            $target_dir = __DIR__ . "/../../uploads/pdfs/";
-                            if (!file_exists($target_dir)) {
-                                if (!mkdir($target_dir, 0777, true)) {
-                                    throw new Exception("Erreur système : Impossible de créer le dossier de destination.");
-                                }
-                            }
-
-                            $target_file = $target_dir . basename($_FILES["fichier_pdf"]["name"]);
-                            if (!move_uploaded_file($_FILES["fichier_pdf"]["tmp_name"], $target_file)) {
-                                throw new Exception("Erreur lors du téléchargement du fichier.");
-                            }
-
-                            $cours = new CoursPDF($titre, $description, $categorie_id, $enseignant_id, $target_file);
-                        } else {
-                            if (empty($_POST['url_video'])) {
-                                throw new Exception("L'URL de la vidéo est requise.");
-                            }
-                            $url_video = $_POST['url_video'];
-                            $cours = new CoursVideo($titre, $description, $categorie_id, $enseignant_id, $url_video);
-                        }
-                        
-                        $query = "INSERT INTO cours (titre, description, contenu, categorie_id, enseignant_id) 
-                                VALUES (:titre, :description, :contenu, :categorie_id, :enseignant_id)";
-                        
-                        $stmt = $pdo->prepare($query);
-                        if (!$stmt->execute([
-                            ':titre' => $cours->getTitre(),
-                            ':description' => $cours->getDescription(),
-                            ':contenu' => $cours->getContenu(),
-                            ':categorie_id' => $cours->getCategorieId(),
-                            ':enseignant_id' => $cours->getEnseignantId()
-                        ])) {
-                            throw new Exception("Erreur lors de l'enregistrement du cours.");
-                        }
-
-                        // recuperer id du cours maintenant cree
-                        $cours_id = $pdo->lastInsertId();
-
-                        // Handle tags
-                        if (isset($_POST['tags']) && !empty($_POST['tags'])) {
-                            $tags = explode(',', $_POST['tags']);
-                            $enseignant = new Enseignant(); // Assuming you have an instance of Enseignant
-                            $enseignant->handleTags($cours_id, $tags);
-                        }
-
-                        $message = "Cours ajouté avec succès!";
-                        header("Location: " . $_SERVER['PHP_SELF'] . "?success=1");
-                        exit;
-                    } catch (Exception $e) {
-                        $message = "Erreur : " . $e->getMessage();
+                if ($type_cours === 'pdf') {
+                    if (!isset($_FILES["fichier_pdf"]) || $_FILES["fichier_pdf"]["error"] !== UPLOAD_ERR_OK) {
+                        throw new Exception("Erreur : Veuillez sélectionner un fichier PDF valide.");
                     }
+
+                    $target_dir = __DIR__ . "/../../uploads/pdfs/";
+                    if (!file_exists($target_dir)) {
+                        if (!mkdir($target_dir, 0777, true)) {
+                            throw new Exception("Erreur système : Impossible de créer le dossier de destination.");
+                        }
+                    }
+
+                    $target_file = $target_dir . basename($_FILES["fichier_pdf"]["name"]);
+                    if (!move_uploaded_file($_FILES["fichier_pdf"]["tmp_name"], $target_file)) {
+                        throw new Exception("Erreur lors du téléchargement du fichier.");
+                    }
+
+                    $cours = new CoursPDF($titre, $description, $categorie_id, $enseignant_id, $target_file);
+                } else {
+                    if (empty($_POST['url_video'])) {
+                        throw new Exception("L'URL de la vidéo est requise.");
+                    }
+                    $url_video = $_POST['url_video'];
+                    $cours = new CoursVideo($titre, $description, $categorie_id, $enseignant_id, $url_video);
                 }
                 
-    // Recuperer la liste des cours de l'enseignant
-    $query = "SELECT c.*, cat.nom as categorie_nom,
-    CASE 
-      WHEN c.contenu LIKE '%.pdf' THEN 'pdf'
-      ELSE 'video'
-    END as type
-    FROM cours c 
-    LEFT JOIN categories cat ON c.categorie_id = cat.id 
-    WHERE c.enseignant_id = :enseignant_id 
-    ORDER BY c.date_creation DESC";
-$stmt = $pdo->prepare($query);
-$stmt->execute([':enseignant_id' => $enseignant_id]);
-$cours_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                $query = "INSERT INTO cours (titre, description, contenu, categorie_id, enseignant_id) 
+                        VALUES (:titre, :description, :contenu, :categorie_id, :enseignant_id)";
+                
+                $stmt = $pdo->prepare($query);
+                if (!$stmt->execute([
+                    ':titre' => $cours->getTitre(),
+                    ':description' => $cours->getDescription(),
+                    ':contenu' => $cours->getContenu(),
+                    ':categorie_id' => $cours->getCategorieId(),
+                    ':enseignant_id' => $cours->getEnseignantId()
+                ])) {
+                    throw new Exception("Erreur lors de l'enregistrement du cours.");
+                }
 
-// Recupérer la liste des categories pour le formulaire
-$query_categories = "SELECT * FROM categories ORDER BY nom";
-$stmt_categories = $pdo->prepare($query_categories);
-$stmt_categories->execute();
-$categories = $stmt_categories->fetchAll(PDO::FETCH_ASSOC);
+                // recuperer id du cours maintenant cree
+                $cours_id = $pdo->lastInsertId();
+
+                // Handle tags
+                if (isset($_POST['tags']) && !empty($_POST['tags'])) {
+                    $tags = explode(',', $_POST['tags']);
+                    $enseignant = new Enseignant(); // Assuming you have an instance of Enseignant
+                    $enseignant->handleTags($cours_id, $tags);
+                }
+
+                $message = "Cours ajouté avec succès!";
+                header("Location: " . $_SERVER['PHP_SELF'] . "?success=1");
+                exit;
+            } catch (Exception $e) {
+                $message = "Erreur : " . $e->getMessage();
+            }
+        }
+                
+                    // Recuperer la liste des cours de l'enseignant
+                    $query = "SELECT c.*, cat.nom as categorie_nom,
+                    CASE 
+                    WHEN c.contenu LIKE '%.pdf' THEN 'pdf'
+                    ELSE 'video'
+                    END as type
+                    FROM cours c 
+                    LEFT JOIN categories cat ON c.categorie_id = cat.id 
+                    WHERE c.enseignant_id = :enseignant_id 
+                    ORDER BY c.date_creation DESC";
+
+                    $stmt = $pdo->prepare($query);
+                    $stmt->execute([':enseignant_id' => $enseignant_id]);
+                    $cours_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                    // la liste des categories pour le formulaire
+                    $query_categories = "SELECT * FROM categories ORDER BY nom";
+                    $stmt_categories = $pdo->prepare($query_categories);
+                    $stmt_categories->execute();
+                    $categories = $stmt_categories->fetchAll(PDO::FETCH_ASSOC);
     ?>
 
 
@@ -234,29 +237,6 @@ $categories = $stmt_categories->fetchAll(PDO::FETCH_ASSOC);
             </div>
         </div>
     </div>
-    
-    <script>
-        document.getElementById('type_cours').addEventListener('change', function() {
-            const pdfUpload = document.getElementById('pdf_upload');
-            const videoUrl = document.getElementById('video_url');
-            
-            if (this.value === 'pdf') {
-                pdfUpload.classList.remove('hidden');
-                videoUrl.classList.add('hidden');
-                document.getElementById('fichier_pdf').required = true;
-                document.getElementById('url_video').required = false;
-            } else if (this.value === 'video') {
-                pdfUpload.classList.add('hidden');
-                videoUrl.classList.remove('hidden');
-                document.getElementById('fichier_pdf').required = false;
-                document.getElementById('url_video').required = true;
-            } else {
-                pdfUpload.classList.add('hidden');
-                videoUrl.classList.add('hidden');
-                document.getElementById('fichier_pdf').required = false;
-                document.getElementById('url_video').required = false;
-            }
-        });
-    </script>
+    <script src="../../public/assets/js/Enseignant.js"></script>
 </body>
 </html>

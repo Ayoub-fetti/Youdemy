@@ -1,8 +1,6 @@
 <?php 
 class Etudiant extends User {
-    public function __construct() {
-        $db = new Database();
-        $pdo = $db->connect();
+    public function __construct($pdo) {
         parent::__construct($pdo);
     }
     // fonction pour s'inscrire a un cours

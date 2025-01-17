@@ -10,12 +10,11 @@ if (!isset($_SESSION['user_id'])) {
     header('Location: ../user/login.php');
     exit;
 }
-$etudiant = new Etudiant();
-$etudiant->setId($_SESSION['user_id']);
+$db = new Database();
+$pdo = $db->connect();
+$etudiant = new Etudiant($pdo);
 $cours = $etudiant->getCoursInscrit();
 
-// var_dump($cours);
-// var_dump($etudiant);
 
 
 ?>

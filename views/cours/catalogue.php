@@ -13,8 +13,9 @@ $cours = $coursObj->getAllCours();
 
 // Traiter l'inscription au cours
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cours_id']) && isset($_SESSION['user_id'])) {
-    $etudiant = new Etudiant();
-    $etudiant->setId($_SESSION['user_id']);
+    $db = new Database();
+    $pdo = $db->connect();
+    $etudiant = new Etudiant($pdo);
     $result = $etudiant->inscrireAuCours($_POST['cours_id']);
     
     if ($result['success']) {
