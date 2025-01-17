@@ -76,7 +76,7 @@ if (isset($_POST['delete_user'])) {
        Tableau de bord
       </span>
      </a>
-     <a class="flex items-center px-4 py-2 mt-2 text-gray-600 hover:bg-gray-100" href="#">
+     <a class="flex items-center px-4 py-2 mt-2 text-gray-600 hover:bg-gray-100" href="gestion_cours">
       <i class="fas fa-file-alt">
       </i>
       <span class="ml-2">
@@ -88,6 +88,13 @@ if (isset($_POST['delete_user'])) {
       </i>
       <span class="ml-2">
        Analytics
+      </span>
+     </a>
+     <a class="flex items-center px-4 py-2 mt-2 text-gray-600 hover:bg-gray-100" href="gestion_categorie.php">
+      <i class="fas fa-chart-bar">
+      </i>
+      <span class="ml-2">
+       Catégories
       </span>
      </a>
      <a class="flex items-center px-4 py-2 mt-2 text-gray-600 hover:bg-red-200" href="../user/logout.php">
