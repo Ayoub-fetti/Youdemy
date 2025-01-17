@@ -121,7 +121,7 @@ class Cours {
             }
 
             // Ajouter l'ordre et la pagination
-            $query .= " ORDER BY c.date_creation DESC LIMIT :limit OFFSET :offset";
+            $query .= "ORDER BY c.date_creation DESC LIMIT :limit OFFSET :offset";
 
             // Executer la requête de comptage
             $stmtCount = $this->pdo->prepare($countQuery);
@@ -181,3 +181,4 @@ class Cours {
         }
     }
 }
+?>
