@@ -12,7 +12,6 @@ $database = new Database();
 $pdo = $database->connect();
 $enseignant = new Enseignant($_SESSION['user_id'], $pdo);
 
-// Message d'erreur
 $error_message = isset($_GET['error']) ? $_GET['error'] : '';
 
 // recuperer les informations du cours
@@ -21,14 +20,18 @@ if (!$cours_id) {
     header('Location: enseignant_dash.php');
     exit;
 }
+var_dump($cours_id);
+var_dump($enseignant);
 
-// Récupérer les catégories
+
+// get categories
 $query_categories = "SELECT * FROM categories ORDER BY nom";
 $stmt_categories = $pdo->prepare($query_categories);
 $stmt_categories->execute();
 $categories = $stmt_categories->fetchAll(PDO::FETCH_ASSOC);
 
-// Récupérer les informations du cours
+
+// get cours info
 $query = "SELECT c.*, GROUP_CONCAT(t.nom) as tags
           FROM cours c 
           LEFT JOIN cours_tags ct ON c.id = ct.cours_id 
@@ -44,10 +47,11 @@ if (!$cours) {
     exit;
 }
 
-// Traiter la soumission du formulaire
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $enseignant->modifierCours($cours_id);
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -60,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body class="bg-gray-100">
     <div class="container mx-auto px-4 py-8 max-w-6xl">
-        <h1 class="text-3xl font-bold text-gray-800 mb-6">Modifier le cours</h1>
+        <h1 class="text-3xl font-bold text-violet-500 mb-6">Modifier le cours</h1>
         
         <?php if (!empty($error_message)): ?>
             <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
@@ -128,7 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 <div class="flex justify-end space-x-4">
                     <a href="enseignant_dash.php" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">Annuler</a>
-                    <button type="submit" class="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800">Enregistrer les modifications</button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-violet-800">Enregistrer les modifications</button>
                 </div>
             </form>
         </div>

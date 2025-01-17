@@ -31,7 +31,6 @@
                 $categorie_id = $_POST['categorie_id'];
                 $type_cours = $_POST['type_cours'];
                 $enseignant_id = $_SESSION['user_id'];
-
                 if ($type_cours === 'pdf') {
                     if (!isset($_FILES["fichier_pdf"]) || $_FILES["fichier_pdf"]["error"] !== UPLOAD_ERR_OK) {
                         throw new Exception("Erreur : Veuillez sélectionner un fichier PDF valide.");
@@ -76,8 +75,8 @@
                 $cours_id = $pdo->lastInsertId();
 
                 // Handle tags
-                if (isset($_POST['tags']) && !empty($_POST['tags'])) {
-                    $tags = explode(',', $_POST['tags']);
+                if (isset($_POST['tags_list']) && !empty($_POST['tags_list'])) {
+                    $tags = explode(',', $_POST['tags_list']);
                     $enseignant = new Enseignant(); // Assuming you have an instance of Enseignant
                     $enseignant->handleTags($cours_id, $tags);
                 }
@@ -120,11 +119,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tableau de bord Enseignant</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../../public/assets/css/style.css">
+
+    <style>
+        /* Styles for tags in enseignant dashboard */
+.tag-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    min-height: 40px;
+}
+
+.tag {
+    background-color: #4F46E5;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    margin: 2px;
+}
+
+.tag span {
+    margin-right: 5px;
+}
+
+.tag button {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+}
+
+    </style>
 </head>
 <body class="bg-gray-100">
     
     <div class="container mx-auto px-4 py-8 max-w-6xl">
-        <h1 class="text-3xl font-bold text-gray-800 mb-6">Tableau de bord Enseignant</h1>
+        <h1 class="text-3xl text-indigo-600 font-bold text-gray-800 mb-6">Tableau de bord Enseignant</h1>
         
         <?php if (!empty($message)): ?>
             <div class="p-4 mb-4 rounded-lg <?php echo strpos($message, 'Erreur') === false ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'; ?>">
@@ -181,8 +216,10 @@
                     </div>
                     
                     <div class="mb-4">
-                        <label for="tags" class="block text-sm font-medium text-gray-700 mb-1">Tags (séparés par des virgules)</label>
-                        <input type="text" class="w-full rounded-md bg-white border-2 border-black shadow-sm focus:border-black focus:ring-black" id="tags" name="tags">
+                        <label for="tags" class="block text-sm font-medium text-gray-700 mb-1">Tags (Appuyez sur virgule après chaque tag)</label>
+                        <div class="tag-container" id="tag-container"></div>
+                        <input type="text" class="w-full rounded-md bg-white border-2 border-black shadow-sm focus:border-black focus:ring-black mt-2" name="tags" id="tags" placeholder="Ajouter des tags">
+                        <input type="hidden" name="tags_list" id="tags_list">
                     </div>
                     
                     <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
@@ -237,6 +274,8 @@
             </div>
         </div>
     </div>
+
     <script src="../../public/assets/js/Enseignant.js"></script>
+
 </body>
 </html>
