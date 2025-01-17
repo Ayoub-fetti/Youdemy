@@ -2,13 +2,14 @@
 require_once 'User.php';
 
 class Admin extends User {
-    // fonction pour recuperer tout les utilisateurs
-    public function getAllUsers() {
-        $stmt = $this->pdo->prepare("SELECT * FROM utilisateurs");
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-    
+
+            // fonction pour recuperer tout les utilisateurs
+            public function getAllUsers() {
+                $stmt = $this->pdo->prepare("SELECT * FROM utilisateurs");
+                $stmt->execute();
+                return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            }
+            
     // fonction pour calculer tout les Etudiants
     public function totalEtudiant() {
         $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM utilisateurs WHERE role = 'etudiant'");

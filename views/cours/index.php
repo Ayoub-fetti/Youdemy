@@ -3,7 +3,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>
-   Preply
+   Youdemy
   </title>
   <script src="https://cdn.tailwindcss.com">
   </script>
@@ -47,11 +47,11 @@
    </div>
  
   </main>
-  <button id="commencer" class="bg-white text-violet-500 px-6 py-3 rounded-full flex items-center justify-center mx-auto">
+  <a id="commencer" href="catalogue.php" class="bg-white text-violet-500 px-6 py-3 rounded-full w-56 flex items-center justify-center mx-auto">
   Découvrez les cours
     <i class="fas fa-arrow-right ml-2">
     </i>
-   </button>
+   </a>
   <section class="bg-white py-8" style="margin-top: 160px;">
    <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-5 gap-8 text-center">
     <div class="md:col-span-1">

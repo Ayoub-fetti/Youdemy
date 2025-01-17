@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jan 13, 2025 at 01:25 PM
+-- Generation Time: Jan 16, 2025 at 10:01 AM
 -- Server version: 8.0.30
 -- PHP Version: 8.1.10
 
@@ -32,6 +32,17 @@ CREATE TABLE `categories` (
   `nom` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+--
+-- Dumping data for table `categories`
+--
+
+INSERT INTO `categories` (`id`, `nom`) VALUES
+(5, 'Économie'),
+(4, 'Géographie'),
+(3, 'Informatique'),
+(1, 'Mathématiques'),
+(2, 'Physique');
+
 -- --------------------------------------------------------
 
 --
@@ -47,6 +58,22 @@ CREATE TABLE `cours` (
   `enseignant_id` int DEFAULT NULL,
   `date_creation` timestamp NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `cours`
+--
+
+INSERT INTO `cours` (`id`, `titre`, `description`, `contenu`, `categorie_id`, `enseignant_id`, `date_creation`) VALUES
+(1, 'Introduction à la Microéconomie', 'Les bases de l offre et de la demande, et les mécanismes de marché.', 'video', 5, 6, '2025-01-15 08:49:01'),
+(2, 'Statistiques pour la Gestion', 'Méthodes statistiques appliquées à la gestion et l\'analyse de données.', 'video', 5, 6, '2025-01-15 08:49:01'),
+(3, 'Programmation en Python', 'Initiation à la programmation avec Python pour les débutants.', 'video', 3, 7, '2025-01-15 08:49:01'),
+(4, 'Cartographie et SIG', 'Utilisation des systèmes d\'information géographique pour la cartographie.', 'video', 3, 7, '2025-01-15 08:49:01'),
+(5, 'Physique des Particules', 'Exploration des concepts fondamentaux de la physique des particules.', 'video', 2, 8, '2025-01-15 08:49:01'),
+(6, 'Économie Internationale', 'Analyse des échanges commerciaux et des politiques économiques mondiales.', 'video', 5, 6, '2025-01-15 08:49:01'),
+(7, 'Calcul Intégral et Différentiel', 'Principes avancés des mathématiques pour l ingénierie.', 'video', 1, 8, '2025-01-15 08:49:01'),
+(8, 'Développement Web Full Stack', 'Introduction au développement dapplications web modernes.', 'video', 3, 7, '2025-01-15 08:49:01'),
+(9, 'Géographie Urbaine', 'Étude des dynamiques des villes et des espaces urbains.', 'video', 4, 8, '2025-01-15 08:49:01'),
+(10, 'Mécanique Quantique', 'Introduction aux concepts de la mécanique quantique moderne.', 'video', 1, 8, '2025-01-15 08:49:01');
 
 -- --------------------------------------------------------
 
@@ -71,6 +98,19 @@ CREATE TABLE `inscriptions` (
   `cours_id` int DEFAULT NULL,
   `date_inscription` timestamp NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `inscriptions`
+--
+
+INSERT INTO `inscriptions` (`id`, `etudiant_id`, `cours_id`, `date_inscription`) VALUES
+(1, 4, 6, '2025-01-15 14:38:04'),
+(2, 4, 2, '2025-01-15 14:41:41'),
+(3, 4, 1, '2025-01-16 08:35:44'),
+(4, 9, 6, '2025-01-16 08:44:36'),
+(5, 9, 2, '2025-01-16 08:52:43'),
+(6, 9, 1, '2025-01-16 09:03:05'),
+(7, 9, 4, '2025-01-16 09:07:38');
 
 -- --------------------------------------------------------
 
@@ -117,7 +157,12 @@ CREATE TABLE `utilisateurs` (
 --
 
 INSERT INTO `utilisateurs` (`id`, `nom`, `email`, `password`, `role`, `status`, `date_creation`) VALUES
-(1, 'admin', 'admin@admin.com', '20252025', 'admin', 'actif', '2025-01-13 09:14:59');
+(1, 'admin', 'admin@admin.com', '20252025', 'admin', 'actif', '2025-01-13 09:14:59'),
+(4, 'fetti', 'fetti@gmail.com', '$2y$10$PFijC8lc2bD/rITZJ3/2huKIjJYc0erYL0XaSv8wrZiFDQTBvbo/C', 'etudiant', 'actif', '2025-01-14 10:12:41'),
+(6, 'amine', 'amine@gmail.com', '$2y$10$RwBU2Q4QpVe6xlHxaVgbP.akWkDMBkWvPId8/HA.DBLCOT8l7VG3q', 'enseignant', 'actif', '2025-01-14 17:44:42'),
+(7, 'rachida', 'rachida@gmail.com', '$2y$10$hqV6XdxdlAizPruDXgc9iuqe8DvnINfzWHZY9F1cy60DQDPXKmaDm', 'enseignant', 'actif', '2025-01-14 18:20:36'),
+(8, 'omar', 'omar@gmail.com', '$2y$10$wLCkPEKwgVGdhGkjO.wvc.hzr7P4xAGfBwR97zgOVPDyy65yEFAX.', 'enseignant', 'actif', '2025-01-14 18:35:12'),
+(9, 'ayoub', 'ayoub@gmailcom', '$2y$10$Y/RYiuxFz4JF5mCSAJI8fuiV6nIL6dfCgAxtQpbN0CZ8fUOt3W/kq', 'etudiant', 'actif', '2025-01-16 08:44:22');
 
 --
 -- Indexes for dumped tables
@@ -135,8 +180,8 @@ ALTER TABLE `categories`
 --
 ALTER TABLE `cours`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `categorie_id` (`categorie_id`),
-  ADD KEY `enseignant_id` (`enseignant_id`);
+  ADD KEY `enseignant_id` (`enseignant_id`),
+  ADD KEY `categorie_id` (`categorie_id`);
 
 --
 -- Indexes for table `cours_tags`
@@ -181,19 +226,19 @@ ALTER TABLE `utilisateurs`
 -- AUTO_INCREMENT for table `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `cours`
 --
 ALTER TABLE `cours`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `inscriptions`
 --
 ALTER TABLE `inscriptions`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `statistiques`
@@ -211,7 +256,7 @@ ALTER TABLE `tags`
 -- AUTO_INCREMENT for table `utilisateurs`
 --
 ALTER TABLE `utilisateurs`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- Constraints for dumped tables
@@ -222,7 +267,10 @@ ALTER TABLE `utilisateurs`
 --
 ALTER TABLE `cours`
   ADD CONSTRAINT `cours_ibfk_1` FOREIGN KEY (`categorie_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `cours_ibfk_2` FOREIGN KEY (`enseignant_id`) REFERENCES `utilisateurs` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `cours_ibfk_2` FOREIGN KEY (`enseignant_id`) REFERENCES `utilisateurs` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `cours_ibfk_3` FOREIGN KEY (`enseignant_id`) REFERENCES `utilisateurs` (`id`),
+  ADD CONSTRAINT `cours_ibfk_4` FOREIGN KEY (`enseignant_id`) REFERENCES `utilisateurs` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `cours_ibfk_5` FOREIGN KEY (`categorie_id`) REFERENCES `categories` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `cours_tags`
@@ -235,7 +283,6 @@ ALTER TABLE `cours_tags`
 -- Constraints for table `inscriptions`
 --
 ALTER TABLE `inscriptions`
-  ADD CONSTRAINT `inscriptions_ibfk_1` FOREIGN KEY (`etudiant_id`) REFERENCES `utilisateurs` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `inscriptions_ibfk_2` FOREIGN KEY (`cours_id`) REFERENCES `cours` (`id`) ON DELETE CASCADE;
 COMMIT;
 
