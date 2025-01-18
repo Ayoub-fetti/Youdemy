@@ -8,28 +8,33 @@ require_once __DIR__ . '/User.php';
 class Enseignant extends User {
     private $specialite;
     private $description;
-    private $db;
+    protected $db;
 
-    public function __construct($id = null, $pdo = null) {
+    public function __construct($pdo = null) {
         if ($pdo === null) {
             $database = new Database();
             $pdo = $database->connect();
         }
         $this->db = $pdo;
-        
+        parent::__construct($pdo);
+    }
+
+    public function loadById($id) {
         if ($id !== null) {
-            $this->id = $id;
             $stmt = $this->db->prepare("SELECT * FROM utilisateurs WHERE id = ?");
             $stmt->execute([$id]);
             $user = $stmt->fetch();
             if ($user) {
+                $this->id = $user['id'];
                 $this->nom = $user['nom'];
                 $this->email = $user['email'];
                 $this->role = $user['role'];
                 $this->status = $user['status'];
                 $this->date_creation = $user['date_creation'];
+                return true;
             }
         }
+        return false;
     }
 
     // Fonction pour ajouter un cours avec polymorphisme
@@ -275,5 +280,61 @@ class Enseignant extends User {
                 $stmt->execute([$cours_id, $tag_id]);
             }
         }
+    }
+
+    // Méthodes pour les statistiques
+    public function getTotalCours($enseignant_id) {
+        $query = "SELECT COUNT(*) as total FROM cours WHERE enseignant_id = :enseignant_id";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute(['enseignant_id' => $enseignant_id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+    }
+
+    public function getCoursLesPlusUtilises($enseignant_id, $limit = 5) {
+        $query = "SELECT c.titre, COUNT(i.id) as nombre_inscriptions 
+                FROM cours c 
+                LEFT JOIN inscriptions i ON c.id = i.cours_id 
+                WHERE c.enseignant_id = :enseignant_id 
+                GROUP BY c.id, c.titre 
+                ORDER BY nombre_inscriptions DESC 
+                LIMIT :limit";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':enseignant_id', $enseignant_id, PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getInscriptionsParMois($enseignant_id, $limit = 12) {
+        $query = "SELECT 
+                    DATE_FORMAT(i.date_inscription, '%Y-%m') as mois,
+                    COUNT(*) as nombre_inscriptions
+                FROM inscriptions i
+                JOIN cours c ON i.cours_id = c.id
+                WHERE c.enseignant_id = :enseignant_id
+                GROUP BY DATE_FORMAT(i.date_inscription, '%Y-%m')
+                ORDER BY mois DESC
+                LIMIT :limit";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':enseignant_id', $enseignant_id, PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getStatistiquesParCategorie($enseignant_id) {
+        $query = "SELECT 
+                    cat.nom as categorie,
+                    COUNT(c.id) as nombre_cours,
+                    COUNT(i.id) as nombre_inscriptions
+                FROM categories cat
+                LEFT JOIN cours c ON cat.id = c.categorie_id AND c.enseignant_id = :enseignant_id
+                LEFT JOIN inscriptions i ON c.id = i.cours_id
+                WHERE c.id IS NOT NULL
+                GROUP BY cat.id, cat.nom
+                ORDER BY nombre_cours DESC";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute(['enseignant_id' => $enseignant_id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }
