@@ -13,7 +13,6 @@ $db = new Database();
 $pdo = $db->connect();
 $admin = new Admin($pdo);
 
-
 $totalCours = $admin->totalCours();
 $coursParCategorie = $admin->getCoursParCategorie();
 $coursPopulaire = $admin->getCoursLePlusPopulaire();
@@ -28,7 +27,6 @@ $topEnseignants = $admin->getTopEnseignants(3);
     <title>Statistiques - Administration</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body class="bg-gray-100 font-sans antialiased">
@@ -113,13 +111,38 @@ $topEnseignants = $admin->getTopEnseignants(3);
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Répartition par catégorie -->
                 <div class="bg-white rounded-lg shadow p-6">
-                    <h2 class="text-xl font-semibold mb-4">Répartition par catégorie</h2>
-                    <canvas id="categoriesChart"></canvas>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Répartition par catégorie</h2>
+                    <div class="grid gap-6">
+                        <?php foreach ($coursParCategorie as $categorie): ?>
+                        <div class="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow duration-300">
+                            <div class="flex justify-between items-start mb-4">
+                                <h3 class="text-xl font-semibold text-gray-800"><?php echo htmlspecialchars($categorie['categorie']); ?></h3>
+                                <div class="text-right">
+                                    <span class="text-sm text-gray-500">Activité globale</span>
+                                    <div class="text-2xl font-bold text-indigo-600"><?php echo round(($categorie['count'] / $totalCours) * 100, 1); ?>%</div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <!-- Cours -->
+                                <div>
+                                    <div class="flex justify-between text-sm text-gray-600 mb-1">
+                                        <span>Cours</span>
+                                        <span class="font-medium"><?php echo $categorie['count']; ?> (<?php echo round(($categorie['count'] / $totalCours) * 100, 1); ?>%)</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-indigo-600 h-2 rounded-full" style="width: <?php echo round(($categorie['count'] / $totalCours) * 100, 1); ?>%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
 
                 <!-- Top 3 Enseignants -->
                 <div class="bg-white rounded-lg shadow p-6">
-                    <h2 class="text-xl font-semibold mb-4">Top 3 Enseignants</h2>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Top 3 Enseignants</h2>
                     <div class="space-y-4">
                         <?php foreach ($topEnseignants as $index => $enseignant): ?>
                         <div class="flex items-center">
@@ -137,35 +160,5 @@ $topEnseignants = $admin->getTopEnseignants(3);
             </div>
         </div>
     </div>
-
-    <script>
-        // Configuration du graphique des catégories
-        const categoriesData = <?php echo json_encode($coursParCategorie); ?>;
-        const ctx = document.getElementById('categoriesChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: categoriesData.map(item => item.categorie),
-                datasets: [{
-                    data: categoriesData.map(item => item.count),
-                    backgroundColor: [
-                        '#8B5CF6',
-                        '#3B82F6',
-                        '#EC4899',
-                        '#10B981',
-                        '#F59E0B'
-                    ]
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    }
-                }
-            }
-        });
-    </script>
 </body>
 </html>

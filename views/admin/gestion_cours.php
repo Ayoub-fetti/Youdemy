@@ -16,6 +16,60 @@ $admin = new Admin($pdo);
 // Récupération de tous les cours
 $cours = $admin->getAllCours();
 
+// Récupération de tous les tags disponibles
+$all_tags = $admin->getAllTags();
+
+// Traitement de la suppression d'un tag
+if(isset($_POST['supprimer_tag'])) {
+    $tag_id = $_POST['tag_id'] ?? 0;
+    if($tag_id && $admin->deleteTag($tag_id)) {
+        $message = "Tag supprimé avec succès!";
+        $messageType = "success";
+        // Rafraîchir la liste des tags
+        $all_tags = $admin->getAllTags();
+        // Rafraîchir la liste des cours pour mettre à jour l'affichage des tags
+        $cours = $admin->getAllCours();
+    } else {
+        $message = "Erreur lors de la suppression du tag.";
+        $messageType = "error";
+    }
+}
+
+// Traitement de l'ajout d'un tag
+if(isset($_POST['ajouter_tag'])) {
+    $tag_nom = trim($_POST['tag_nom'] ?? '');
+    if(!empty($tag_nom)) {
+        if($admin->addTag($tag_nom)) {
+            $message = "Tag ajouté avec succès!";
+            $messageType = "success";
+            // Rafraîchir la liste des tags
+            $all_tags = $admin->getAllTags();
+        } else {
+            $message = "Erreur lors de l'ajout du tag.";
+            $messageType = "error";
+        }
+    } else {
+        $message = "Le nom du tag ne peut pas être vide.";
+        $messageType = "error";
+    }
+}
+
+// Traitement de la modification des tags
+if(isset($_POST['modifier_tags'])) {
+    $cours_id = $_POST['cours_id'] ?? 0;
+    $tags = $_POST['tags'] ?? [];
+    
+    if($cours_id && $admin->updateCourseTags($cours_id, $tags)) {
+        $message = "Tags modifiés avec succès!";
+        $messageType = "success";
+        // Rafraîchir la liste des cours
+        $cours = $admin->getAllCours();
+    } else {
+        $message = "Erreur lors de la modification des tags. Veuillez réessayer.";
+        $messageType = "error";
+    }
+}
+
 // Traitement de la suppression d'un cours
 if(isset($_POST['supprimer_cours'])) {
     $cours_id = $_POST['cours_id'] ?? 0;
@@ -99,7 +153,16 @@ if(isset($_POST['supprimer_cours'])) {
             <div class="bg-white rounded-lg shadow-lg p-6">
             
                 <h2 class="text-2xl font-semibold mb-6">Rechercher des Cours</h2>
-                <input class="w-56 px-4 py-2 mb-8 pl-10 text-gray-700 bg-white border rounded-full focus:outline-none" id="searchInput" placeholder="Rechercher ici..." type="text"/>
+                <div class="form-group">
+                    <input class="w-56 px-4 py-2 mb-8 pl-10 text-gray-700 bg-white border rounded-full focus:outline-none" id="searchInput" placeholder="Rechercher ici..." type="text" style="display:inline-block; width:auto;">
+                    <form method="POST" class="inline" style="display:inline-block; width:auto;">
+                        <input name="tag_nom" class="w-56 px-4 py-2 pl-4 text-gray-700 bg-white border rounded-full focus:outline-none" placeholder="Nom du tag..." type="text"/>
+                        <button type="submit" name="ajouter_tag" class="px-4 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 focus:outline-none">
+                            Ajouter
+                        </button>
+                    </form>
+                </div>
+            
                 <h2 class="text-2xl font-semibold mb-6">Gestion des Cours</h2>
 
                 <?php if(isset($message)): ?>
@@ -123,20 +186,23 @@ if(isset($_POST['supprimer_cours'])) {
                         <tbody class="divide-y divide-gray-200">
                             <?php foreach($cours as $course): ?>
                                 <tr class="transaction-row">
-                                    <td class="px-6 py-4 whitespace-no-wrap"><?php echo htmlspecialchars($course['titre'] ?? ''); ?></td>
-                                    <td class="px-4 py-4"><?php echo htmlspecialchars(substr($course['description'] ?? '', 0, 100)); ?></td>
-                                    <td class="px-6 py-4"><?php echo htmlspecialchars($course['nom_enseignant'] ?? ''); ?></td>
+                                    <td class="px-6 py-4"><?php echo htmlspecialchars($course['titre']); ?></td>
+                                    <td class="px-6 py-4"><?php echo htmlspecialchars($course['description']); ?></td>
+                                    <td class="px-6 py-4"><?php echo htmlspecialchars($course['nom_enseignant']); ?></td>
                                     <td class="px-6 py-4"><?php echo htmlspecialchars($course['tags'] ?? ''); ?></td>
-
-                                    <td class="px-6 py-4 whitespace-no-wrap">
-                                        <form method="POST" class="inline">
-                                            <input type="hidden" name="cours_id" value="<?php echo $course['id']; ?>">
-                                            <button type="submit" name="supprimer_cours" 
-                                                    class="text-red-600 hover:text-red-900"
-                                                    onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce cours ?');">
-                                                <i class="fas fa-trash"></i>
+                                    <td class="px-6 py-4">
+                                        <div class="flex space-x-2">
+                                            <button type="button" onclick="openEditModal(<?php echo $course['id']; ?>, '<?php echo htmlspecialchars($course['tags'] ?? '', ENT_QUOTES); ?>')" 
+                                                    class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">
+                                                <i class="fas fa-tags"></i>
                                             </button>
-                                        </form>
+                                            <form method="POST" class="inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce cours?');">
+                                                <input type="hidden" name="cours_id" value="<?php echo $course['id']; ?>">
+                                                <button type="submit" name="supprimer_cours" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -146,9 +212,55 @@ if(isset($_POST['supprimer_cours'])) {
             </div>
         </div>
     </div>
+    <!-- Modal de modification -->
+    <div id="editModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-96">
+            <h3 class="text-xl font-bold mb-4">Modifier les tags</h3>
+            <form id="editForm" method="POST" class="space-y-4">
+                <input type="hidden" name="cours_id" id="editCourseId">
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">Sélectionner les tags:</label>
+                    <div class="max-h-48 overflow-y-auto p-2 border rounded">
+                        <?php foreach ($all_tags as $tag): ?>
+                        <div class="flex items-center justify-between mb-2 p-2 hover:bg-gray-50">
+                            <div class="flex items-center space-x-2">
+                                <input type="checkbox" name="tags[]" value="<?php echo $tag['id']; ?>" 
+                                       id="tag_<?php echo $tag['id']; ?>"
+                                       class="tag-checkbox h-4 w-4 text-blue-600 rounded border-gray-300">
+                                <label for="tag_<?php echo $tag['id']; ?>" class="text-sm text-gray-700">
+                                    <?php echo htmlspecialchars($tag['nom']); ?>
+                                </label>
+                            </div>
+                            <button type="button" onclick="deleteTag(<?php echo $tag['id']; ?>)" 
+                                    class="text-red-500 hover:text-red-700">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-2 mt-4">
+                    <button type="button" onclick="closeEditModal()" 
+                            class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400">
+                        Annuler
+                    </button>
+                    <button type="submit" name="modifier_tags" 
+                            class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                        Enregistrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Formulaire caché pour la suppression des tags -->
+    <form id="deleteTagForm" method="POST" style="display: none;">
+        <input type="hidden" name="tag_id" id="deleteTagId">
+        <input type="hidden" name="supprimer_tag" value="1">
+    </form>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="../../public/assets/js/gestion_cours.js"></script>
     <script src="../../public/assets/js/Dashbord.js"></script>
-
 </body>
 </html>

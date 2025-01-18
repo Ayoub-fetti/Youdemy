@@ -21,13 +21,12 @@ class Cours {
         try {
             $query = "SELECT c.*, u.nom as enseignant_nom, cat.nom as categorie_nom 
                      FROM cours c 
-                     LEFT JOIN utilisateurs u ON c.enseignant_id = u.id 
+                     INNER JOIN utilisateurs u ON c.enseignant_id = u.id 
                      LEFT JOIN categories cat ON c.categorie_id = cat.id 
-                     WHERE u.role = :role
+                     WHERE u.role = 'enseignant'
                      ORDER BY c.date_creation DESC";
             
             $stmt = $this->pdo->prepare($query);
-            $stmt->bindValue(':role', 'enseignant', PDO::PARAM_STR);
             $stmt->execute();
             
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -94,18 +93,16 @@ class Cours {
 
             // Requête pour obtenir le nombre total de cours
             $countQuery = "SELECT COUNT(*) as total FROM cours c 
-                          LEFT JOIN utilisateurs u ON c.enseignant_id = u.id 
+                          INNER JOIN utilisateurs u ON c.enseignant_id = u.id 
                           LEFT JOIN categories cat ON c.categorie_id = cat.id 
-                          WHERE u.role = :role";
+                          WHERE u.role = 'enseignant'";
             
             // Requête pour obtenir les cours
             $query = "SELECT c.*, u.nom as enseignant_nom, cat.nom as categorie_nom 
                      FROM cours c 
-                     LEFT JOIN utilisateurs u ON c.enseignant_id = u.id 
+                     INNER JOIN utilisateurs u ON c.enseignant_id = u.id 
                      LEFT JOIN categories cat ON c.categorie_id = cat.id 
-                     WHERE u.role = :role";
-
-            $params = [':role' => 'enseignant'];
+                     WHERE u.role = 'enseignant'";
 
             // Ajouter la condition de recherche si un terme est fourni
             if (!empty($searchTerm)) {
@@ -121,27 +118,29 @@ class Cours {
             }
 
             // Ajouter l'ordre et la pagination
-            $query .= "ORDER BY c.date_creation DESC LIMIT :limit OFFSET :offset";
+            $query .= " ORDER BY c.date_creation DESC LIMIT :limit OFFSET :offset";
 
             // Executer la requête de comptage
             $stmtCount = $this->pdo->prepare($countQuery);
-            foreach ($params as $key => $value) {
-                $stmtCount->bindValue($key, $value);
+            if (!empty($searchTerm)) {
+                $stmtCount->bindValue(':search', "%{$searchTerm}%", PDO::PARAM_STR);
             }
             $stmtCount->execute();
             $totalCours = $stmtCount->fetch(PDO::FETCH_ASSOC)['total'];
 
             // Executer la requête principale
             $stmt = $this->pdo->prepare($query);
-            foreach ($params as $key => $value) {
-                $stmt->bindValue($key, $value);
+            if (!empty($searchTerm)) {
+                $stmt->bindValue(':search', "%{$searchTerm}%", PDO::PARAM_STR);
             }
             $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
             $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
             $stmt->execute();
             
+            $cours = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
             return [
-                'cours' => $stmt->fetchAll(PDO::FETCH_ASSOC),
+                'cours' => $cours,
                 'total' => $totalCours,
                 'pages' => ceil($totalCours / $limit),
                 'current_page' => $page

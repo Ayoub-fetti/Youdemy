@@ -17,21 +17,31 @@ document.addEventListener('DOMContentLoaded', function() {
     // Fonction pour charger les cours
     async function loadCours(page = 1, search = '') {
         try {
-            const response = await fetch(`/Youdemy/controllers/cours/pagination.php?page=${page}&search=${encodeURIComponent(search)}`);
+            const response = await fetch(`../../controllers/cours/pagination.php?page=${page}&search=${encodeURIComponent(search)}`);
             if (!response.ok) {
                 throw new Error(`Erreur HTTP: ${response.status}`);
             }
             const data = await response.json();
-            updateCoursList(data.cours);
-            updatePagination(data.pages, data.current_page);
-            
-            // Mettre à jour le compteur de cours
-            const coursCount = document.getElementById('totalCours');
-            if (coursCount) {
-                coursCount.textContent = `${data.total} cours trouvés`;
+            console.log('Données reçues:', data); // Debug
+            if (data && data.cours) {
+                updateCoursList(data.cours);
+                updatePagination(data.pages, data.current_page);
+                
+                // Mettre à jour le compteur de cours
+                const coursCount = document.getElementById('totalCours');
+                if (coursCount) {
+                    coursCount.textContent = `${data.total} Total des cours`;
+                }
+            } else {
+                console.error('Données invalides reçues:', data);
             }
         } catch (error) {
             console.error('Erreur lors du chargement des cours:', error);
+            coursContainer.innerHTML = `
+                <div class="col-span-full text-center py-8 text-red-500">
+                    Une erreur est survenue lors du chargement des cours.
+                </div>
+            `;
         }
     }
 
