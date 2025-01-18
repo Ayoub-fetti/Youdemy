@@ -170,4 +170,72 @@ class Admin extends User {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    // Fonction pour mettre à jour les tags d'un cours
+    public function updateCourseTags($cours_id, $tags) {
+        try {
+            $this->pdo->beginTransaction();
+            
+            // Supprimer les tags existants
+            $stmt = $this->pdo->prepare("DELETE FROM cours_tags WHERE cours_id = :cours_id");
+            $stmt->execute([':cours_id' => $cours_id]);
+            
+            // Ajouter les nouveaux tags
+            if (!empty($tags)) {
+                $stmt = $this->pdo->prepare("INSERT INTO cours_tags (cours_id, tag_id) VALUES (:cours_id, :tag_id)");
+                foreach ($tags as $tag_id) {
+                    $stmt->execute([
+                        ':cours_id' => $cours_id,
+                        ':tag_id' => $tag_id
+                    ]);
+                }
+            }
+            
+            $this->pdo->commit();
+            return true;
+        } catch (PDOException $e) {
+            $this->pdo->rollBack();
+            error_log("Error updating course tags: " . $e->getMessage());
+            return false;
+        }
+    }
+    
+    // Fonction pour recuperer tous les tags disponibles
+    public function getAllTags() {
+        $stmt = $this->pdo->prepare("SELECT * FROM tags ORDER BY nom");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // Fonction pour supprimer un tag
+    public function deleteTag($tag_id) {
+        try {
+            $this->pdo->beginTransaction();
+            
+            // D'abord supprimer les associations dans cours_tags
+            $stmt = $this->pdo->prepare("DELETE FROM cours_tags WHERE tag_id = :tag_id");
+            $stmt->execute([':tag_id' => $tag_id]);
+            
+            // Ensuite supprimer le tag
+            $stmt = $this->pdo->prepare("DELETE FROM tags WHERE id = :tag_id");
+            $stmt->execute([':tag_id' => $tag_id]);
+            
+            $this->pdo->commit();
+            return true;
+        } catch (PDOException $e) {
+            $this->pdo->rollBack();
+            error_log("Error deleting tag: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    // Fonction pour ajouter un nouveau tag
+    public function addTag($nom) {
+        try {
+            $stmt = $this->pdo->prepare("INSERT INTO tags (nom) VALUES (:nom)");
+            return $stmt->execute(['nom' => $nom]);
+        } catch (PDOException $e) {
+            error_log("Error adding tag: " . $e->getMessage());
+            return false;
+        }
+    }
 }
