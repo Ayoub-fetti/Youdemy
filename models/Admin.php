@@ -10,6 +10,46 @@ class Admin extends User {
                 return $stmt->fetchAll(PDO::FETCH_ASSOC);
             }
 
+            // fonction pour recuperer tout les cours
+
+            public function getAllCours(){
+                $stmt = $this->pdo->prepare("
+                    SELECT 
+                        c.*,
+                        u.nom as nom_enseignant,
+                        GROUP_CONCAT(t.nom) as tags
+                    FROM cours c
+                    INNER JOIN utilisateurs u ON c.enseignant_id = u.id
+                    LEFT JOIN cours_tags ct ON c.id = ct.cours_id
+                    LEFT JOIN tags t ON ct.tag_id = t.id
+                    GROUP BY c.id
+                ");
+                $stmt->execute();
+                return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            }
+
+            // fonction pour supprimer un cours 
+            public function deleteCourse($id){
+                try {
+                    $this->pdo->beginTransaction();
+                    
+                    // First delete related records in cours_tags
+                    $stmt = $this->pdo->prepare("DELETE FROM cours_tags WHERE cours_id = :id");
+                    $stmt->execute([':id' => $id]);
+                    
+                    // Then delete the course
+                    $stmt = $this->pdo->prepare("DELETE FROM cours WHERE id = :id");
+                    $stmt->execute([':id' => $id]);
+                    
+                    $this->pdo->commit();
+                    return true;
+                } catch (PDOException $e) {
+                    $this->pdo->rollBack();
+                    error_log("Error deleting course: " . $e->getMessage());
+                    return false;
+                }
+            }
+
 
             
     // fonction pour calculer tout les Etudiants
@@ -18,6 +58,7 @@ class Admin extends User {
         $stmt->execute();
         return $stmt->fetchColumn();
     }
+
 
     // fonction pour calculer tout les enseignants
     public function totalEnseignant(){

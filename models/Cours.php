@@ -158,27 +158,27 @@ class Cours {
     }
 
     // Fonction pour mettre à jour un cours
-    public function updateCours($id, $titre, $description, $contenu, $categorie_id) {
-        try {
-            $query = "UPDATE cours 
-                     SET titre = :titre, 
-                         description = :description, 
-                         contenu = :contenu, 
-                         categorie_id = :categorie_id 
-                     WHERE id = :id";
+    // public function updateCours($id, $titre, $description, $contenu, $categorie_id) {
+    //     try {
+    //         $query = "UPDATE cours 
+    //                  SET titre = :titre, 
+    //                      description = :description, 
+    //                      contenu = :contenu, 
+    //                      categorie_id = :categorie_id 
+    //                  WHERE id = :id";
             
-            $stmt = $this->pdo->prepare($query);
-            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
-            $stmt->bindValue(':titre', $titre, PDO::PARAM_STR);
-            $stmt->bindValue(':description', $description, PDO::PARAM_STR);
-            $stmt->bindValue(':contenu', $contenu, PDO::PARAM_STR);
-            $stmt->bindValue(':categorie_id', $categorie_id, PDO::PARAM_INT);
+    //         $stmt = $this->pdo->prepare($query);
+    //         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+    //         $stmt->bindValue(':titre', $titre, PDO::PARAM_STR);
+    //         $stmt->bindValue(':description', $description, PDO::PARAM_STR);
+    //         $stmt->bindValue(':contenu', $contenu, PDO::PARAM_STR);
+    //         $stmt->bindValue(':categorie_id', $categorie_id, PDO::PARAM_INT);
             
-            return $stmt->execute();
-        } catch (PDOException $e) {
-            error_log("Erreur dans updateCours: " . $e->getMessage());
-            return false;
-        }
-    }
+    //         return $stmt->execute();
+    //     } catch (PDOException $e) {
+    //         error_log("Erreur dans updateCours: " . $e->getMessage());
+    //         return false;
+    //     }
+    // }
 }
 ?>

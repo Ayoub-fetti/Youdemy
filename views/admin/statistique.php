@@ -46,14 +46,14 @@ $topEnseignants = $admin->getTopEnseignants(3);
                     <i class="fas fa-home"></i>
                     <span class="ml-2">Tableau de bord</span>
                 </a>
-                <a class="flex items-center px-4 py-2 mt-2 text-gray-600 hover:bg-gray-100" href="gestion_cours">
+                <a class="flex items-center px-4 py-2 mt-2 text-gray-600 hover:bg-gray-100" href="gestion_cours.php">
                         <i class="fas fa-file-alt">
                         </i>
                         <span class="ml-2">
                         Cours
                         </span>
                         </a>
-                        <a class="flex items-center px-4 py-2 mt-2 text-gray-600 hover:bg-gray-100" href="statistique.php">
+                        <a class="flex items-center px-4 py-2 text-gray-700 bg-gray-100" href="statistique.php">
                         <i class="fas fa-chart-bar">
                         </i>
                         <span class="ml-2">
@@ -61,7 +61,8 @@ $topEnseignants = $admin->getTopEnseignants(3);
                         </span>
                         </a>
                         <a class="flex items-center px-4 py-2 mt-2 text-gray-600 hover:bg-gray-100" href="gestion_categorie.php">
-                        <i class="fas fa-chart-bar">
+                        <!-- <i class="fas fa-chart-bar"> -->
+                        <i class="fas fa-sitemap"></i>
                         </i>
                         <span class="ml-2">
                         Catégories

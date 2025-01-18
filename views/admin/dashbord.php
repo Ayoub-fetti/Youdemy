@@ -76,7 +76,7 @@ if (isset($_POST['delete_user'])) {
        Tableau de bord
       </span>
      </a>
-     <a class="flex items-center px-4 py-2 mt-2 text-gray-600 hover:bg-gray-100" href="gestion_cours">
+     <a class="flex items-center px-4 py-2 mt-2 text-gray-600 hover:bg-gray-100" href="gestion_cours.php">
       <i class="fas fa-file-alt">
       </i>
       <span class="ml-2">
@@ -91,7 +91,8 @@ if (isset($_POST['delete_user'])) {
       </span>
      </a>
      <a class="flex items-center px-4 py-2 mt-2 text-gray-600 hover:bg-gray-100" href="gestion_categorie.php">
-      <i class="fas fa-chart-bar">
+      <!-- <i class="fas fa-chart-bar"> -->
+      <i class="fas fa-sitemap"></i>
       </i>
       <span class="ml-2">
        Catégories
@@ -110,7 +111,7 @@ if (isset($_POST['delete_user'])) {
    <div class="flex-1 p-6">
     <div class="flex items-center justify-between">
      <div class="relative">
-      <input class="w-full px-4 py-2 pl-10 text-gray-700 bg-white border rounded-full focus:outline-none" id="searchInput" placeholder="Search here..." type="text"/>
+      <input class="w-full px-4 py-2 pl-10 text-gray-700 bg-white border rounded-full focus:outline-none" id="searchInput" placeholder="Rechercher ici..." type="text"/>
       </i>
      </div>
     </div>
