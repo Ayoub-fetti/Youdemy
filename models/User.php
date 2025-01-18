@@ -79,6 +79,9 @@ class User {
         }
         return false;
     }
+
+    // register method
+    
     public function register($nom, $email, $password, $role) {
         try {
             // VErifier si l'email existe dEjA

@@ -76,6 +76,9 @@ if(isset($_POST['modifier_submit'])) {
       Bienvenue
      </div>
      <div class="ml-2 text-2xl font-semibold">
+     <?php echo htmlspecialchars(ucfirst($_SESSION['user_nom'])); ?>
+     </div>
+     <div class="ml-2 text-2xl font-semibold">
      <!-- <?php echo htmlspecialchars(ucfirst($_SESSION['user_nom'])); ?> -->
      </div>
     </div>
@@ -87,7 +90,7 @@ if(isset($_POST['modifier_submit'])) {
        Tableau de bord
       </span>
      </a>
-     <a class="flex items-center px-4 py-2 mt-2 text-gray-600 hover:bg-gray-100" href="gestion_cours">
+     <a class="flex items-center px-4 py-2 mt-2 text-gray-600 hover:bg-gray-100" href="gestion_cours.php">
       <i class="fas fa-file-alt">
       </i>
       <span class="ml-2">
@@ -102,7 +105,8 @@ if(isset($_POST['modifier_submit'])) {
       </span>
      </a>
      <a class="flex items-center px-4 py-2 text-gray-700 bg-gray-100" href="gestion_categorie.php">
-      <i class="fas fa-chart-bar">
+      <!-- <i class="fas fa-chart-bar"> -->
+      <i class="fas fa-sitemap"></i>
       </i>
       <span class="ml-2">
        Catégories
@@ -162,17 +166,17 @@ if(isset($_POST['modifier_submit'])) {
                                     <form method="POST" class="inline">
                                         <input type="hidden" name="categorie_id" value="<?php echo $categorie['id']; ?>">
                                         <button type="submit" name="supprimer" 
-                                                class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                                              class="text-red-600 hover:text-red-900"
                                                 onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?');">
-                                            Supprimer
+                                                <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
                                 </td>
                                 <td class="py-4 px-6 text-center">
                                     <button type="button" 
                                             onclick="openEditModal('<?php echo $categorie['id']; ?>', '<?php echo htmlspecialchars($categorie['nom']); ?>')"
-                                            class="bg-orange-500 text-white px-3 py-1 rounded hover:bg-orange-600">
-                                        Modifier
+                                            class="text-orange-600 hover:text-orange-900">
+                                            <i class="fas fa-edit"></i>
                                     </button>
                                 </td>
                             </tr>
