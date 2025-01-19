@@ -10,9 +10,11 @@ class User {
     protected $status;
     protected $date_creation;
     
-
     public function __construct($pdo)
     {
+        if (!($pdo instanceof PDO)) {
+            throw new Exception("Un objet PDO valide est requis");
+        }
         $this->pdo = $pdo;
         if (isset($_SESSION['user_id'])) {
             $this->id = $_SESSION['user_id'];

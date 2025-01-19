@@ -34,7 +34,7 @@
                     throw new Exception("Erreur : Veuillez sélectionner un fichier PDF valide.");
                 }
 
-                $target_dir = __DIR__ . "/../../uploads/pdfs/";
+                $target_dir = __DIR__ . "/../../public/uploads/pdfs/";
                 if (!file_exists($target_dir)) {
                     if (!mkdir($target_dir, 0777, true)) {
                         throw new Exception("Erreur système : Impossible de créer le dossier de destination.");

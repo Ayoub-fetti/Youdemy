@@ -17,7 +17,7 @@ $error_message = isset($_GET['error']) ? $_GET['error'] : '';
 // recuperer les informations du cours
 $cours_id = isset($_GET['id']) ? $_GET['id'] : null;
 if (!$cours_id) {
-    header('Location: enseignant_dash.php');
+    header('Location: mes_cours.php');
     exit;
 }
 var_dump($cours_id);
@@ -43,7 +43,7 @@ $stmt->execute([$cours_id, $_SESSION['user_id']]);
 $cours = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$cours) {
-    header('Location: enseignant_dash.php');
+    header('Location: mes_cours.php');
     exit;
 }
 

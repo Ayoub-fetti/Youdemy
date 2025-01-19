@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
     $delete_query = "DELETE FROM cours WHERE id = :id";
     $delete_stmt = $db->prepare($delete_query);
     $delete_stmt->execute([':id' => $id]);
-    header('Location: enseignant_Dash.php');
+    header('Location: mes_cours.php');
     exit;
 } else {
     die('Invalid request.');

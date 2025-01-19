@@ -54,7 +54,7 @@ $cours = $etudiant->getCoursInscrit();
         <?php else: ?>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <?php foreach ($cours as $course): ?>
-                    <div class="bg-violet-300 rounded-lg shadow-md p-4">
+                    <div class="bg-white rounded-lg shadow-md p-4">
                         <div class="flex items-center justify-between mb-2">
                             <span class="text-gray-500 text-sm flex items-center space-x-1">
                                 <i class="fas fa-id-card-alt text-gray-700"></i>
