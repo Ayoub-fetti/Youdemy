@@ -1,11 +1,14 @@
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('JavaScript chargé !');
+    console.log('coursContainer trouvé:', document.getElementById('coursContainer'));
+
     // Fonction pour vérifier si l'utilisateur est connecté
     function isUserLoggedIn() {
         return document.body.dataset.userLoggedIn === 'true';
     }
 
     const searchInput = document.getElementById('searchCours');
-    const coursContainer = document.querySelector('.grid');
+    const coursContainer = document.getElementById('coursContainer');
     const paginationContainer = document.createElement('div');
     paginationContainer.className = 'flex justify-center mt-6 space-x-2';
     coursContainer.parentNode.insertBefore(paginationContainer, coursContainer.nextSibling);
@@ -17,13 +20,31 @@ document.addEventListener('DOMContentLoaded', function() {
     // Fonction pour charger les cours
     async function loadCours(page = 1, search = '') {
         try {
+            console.log('Chargement des cours...');
+            console.log('URL:', `../../controllers/cours/pagination.php?page=${page}&search=${encodeURIComponent(search)}`);
+            
             const response = await fetch(`../../controllers/cours/pagination.php?page=${page}&search=${encodeURIComponent(search)}`);
+            console.log('Status:', response.status);
+            
             if (!response.ok) {
                 throw new Error(`Erreur HTTP: ${response.status}`);
             }
+            
             const data = await response.json();
-            console.log('Données reçues:', data); // Debug
-            if (data && data.cours) {
+            console.log('Données reçues (détaillées):', {
+                data: data,
+                type: typeof data,
+                keys: Object.keys(data),
+                cours: data.cours,
+                total: data.total,
+                pages: data.pages
+            });
+            
+            if (!data || !data.cours) {
+                throw new Error('Format de données invalide');
+            }
+            
+            if (Array.isArray(data.cours)) {
                 updateCoursList(data.cours);
                 updatePagination(data.pages, data.current_page);
                 
@@ -34,6 +55,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             } else {
                 console.error('Données invalides reçues:', data);
+                coursContainer.innerHTML = `
+                    <div class="col-span-full text-center py-8 text-red-500">
+                        Aucune donnée de cours disponible
+                    </div>
+                `;
             }
         } catch (error) {
             console.error('Erreur lors du chargement des cours:', error);
@@ -58,9 +84,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Fonction pour mettre à jour la liste des cours
     function updateCoursList(cours) {
+        console.log('Mise à jour de la liste des cours:', cours);
+        
+        if (!coursContainer) {
+            console.error('Container des cours non trouvé!');
+            return;
+        }
+
         coursContainer.innerHTML = '';
         
-        if (cours.length === 0) {
+        if (!Array.isArray(cours) || cours.length === 0) {
+            console.log('Aucun cours à afficher');
             coursContainer.innerHTML = `
                 <div class="col-span-full text-center py-8 text-gray-500">
                     Aucun cours trouvé
@@ -69,7 +103,11 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        cours.forEach(course => {
+        console.log(`Affichage de ${cours.length} cours`);
+        
+        cours.forEach((course, index) => {
+            console.log(`Traitement du cours ${index + 1}:`, course);
+            
             const date = new Date(course.date_creation);
             const dateFormatted = date.toLocaleDateString('fr-FR', {
                 day: '2-digit',
@@ -78,21 +116,21 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             const courseCard = `
-                <div class="bg-violet-300 rounded-lg shadow-md p-4">
+                <div class="bg-white rounded-lg shadow-md p-4">
                     <div class="flex items-center justify-between mb-2">
                         <span class="text-gray-500 text-sm flex items-center space-x-1">
                             <i class="fas fa-id-card-alt text-gray-700"></i>
                             <span class="creerPar">
-                                creer par : ${course.enseignant_nom} le 
+                                créer par : ${course.enseignant_nom || 'Anonyme'} le 
                                 <span>${dateFormatted}</span>
                             </span>
                         </span>
                     </div>
                     <div class="mb-2">
-                        <span class="text-purple-600 text-sm">${course.categorie_nom}</span>
+                        <span class="text-purple-600 text-sm">${course.categorie_nom || 'Non catégorisé'}</span>
                     </div>
-                    <h2 class="text-lg font-semibold mb-2">${course.titre}</h2>
-                    <p class="text-gray-700 text-sm">${course.description}</p>
+                    <h2 class="text-lg font-semibold mb-2">${course.titre || 'Sans titre'}</h2>
+                    <p class="text-gray-700 text-sm">${course.description || 'Aucune description'}</p>
                     <div class="mt-4">
                         ${isUserLoggedIn() ? `
                             <form action="" method="POST" class="inscription-form">
@@ -111,10 +149,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 </div>
             `;
+            
             coursContainer.innerHTML += courseCard;
         });
 
-        // Ajouter les gestionnaires d'evenements pour les formulaires d'inscription
+        console.log('Mise à jour des cours terminée');
+
+        // Ajouter les gestionnaires d'événements pour les formulaires d'inscription
         document.querySelectorAll('.inscription-form').forEach(form => {
             form.addEventListener('submit', function(e) {
                 e.preventDefault();

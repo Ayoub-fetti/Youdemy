@@ -10,13 +10,17 @@ class Enseignant extends User {
     private $description;
     protected $db;
 
-    public function __construct($pdo = null) {
+    public function __construct($id = null, $pdo = null) {
         if ($pdo === null) {
             $database = new Database();
             $pdo = $database->connect();
         }
         $this->db = $pdo;
         parent::__construct($pdo);
+        
+        if ($id !== null) {
+            $this->loadById($id);
+        }
     }
 
     public function loadById($id) {
@@ -51,18 +55,17 @@ class Enseignant extends User {
                 // Creer l'instance appropriee selon le type de cours
                 if ($type_cours === 'pdf' && isset($_FILES['fichier_pdf'])) {
                     $fichier = $_FILES['fichier_pdf'];
-                    $dossier_upload = __DIR__ . '/../uploads/pdf/';
+                    $dossier_upload = __DIR__ . '/../public/uploads/pdfs/';
                     
                     if (!file_exists($dossier_upload)) {
                         mkdir($dossier_upload, 0777, true);
                     }
 
-                    $extension = pathinfo($fichier['name'], PATHINFO_EXTENSION);
-                    $nom_fichier = uniqid() . '.' . $extension;
+                    $nom_fichier = basename($fichier['name']);
                     $chemin_fichier = $dossier_upload . $nom_fichier;
 
                     if (move_uploaded_file($fichier['tmp_name'], $chemin_fichier)) {
-                        $cours = new CoursPDF($titre, $description, $categorie_id, $this->getId(), '/uploads/pdf/' . $nom_fichier);
+                        $cours = new CoursPDF($titre, $description, $categorie_id, $this->getId(), '/uploads/pdfs/' . $nom_fichier);
                     } else {
                         throw new Exception("Erreur lors du téléchargement du fichier PDF");
                     }
@@ -209,19 +212,18 @@ class Enseignant extends User {
                 // Gestion du contenu selon le type
                 if ($type_cours === 'pdf' && isset($_FILES['fichier_pdf']) && $_FILES['fichier_pdf']['size'] > 0) {
                     $fichier = $_FILES['fichier_pdf'];
-                    $dossier_upload = __DIR__ . '/../uploads/pdf/';
+                    $dossier_upload = __DIR__ . '/../public/uploads/pdfs/';
                     
                     if (!file_exists($dossier_upload)) {
                         mkdir($dossier_upload, 0777, true);
                     }
 
-                    $extension = pathinfo($fichier['name'], PATHINFO_EXTENSION);
-                    $nom_fichier = uniqid() . '.' . $extension;
+                    $nom_fichier = basename($fichier['name']);
                     $chemin_fichier = $dossier_upload . $nom_fichier;
 
                     if (move_uploaded_file($fichier['tmp_name'], $chemin_fichier)) {
                         $query .= ", contenu = :contenu";
-                        $params[':contenu'] = '/uploads/pdf/' . $nom_fichier;
+                        $params[':contenu'] = '/uploads/pdfs/' . $nom_fichier;
                         
                         // Supprimer l'ancien fichier PDF si il existe
                         if ($cours['contenu'] && file_exists(__DIR__ . '/..' . $cours['contenu'])) {

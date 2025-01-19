@@ -14,8 +14,7 @@
 
     $db = new Database();
     $pdo = $db->connect();
-    $enseignant = new Enseignant($pdo);
-    $enseignant->loadById($_SESSION['user_id']);
+    $enseignant = new Enseignant($_SESSION['user_id'], $pdo);
     $enseignant_id = $_SESSION['user_id'];
 
     // Récupérer les statistiques

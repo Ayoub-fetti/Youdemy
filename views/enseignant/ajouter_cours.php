@@ -34,7 +34,7 @@
                     throw new Exception("Erreur : Veuillez sélectionner un fichier PDF valide.");
                 }
 
-                $target_dir = __DIR__ . "/../../uploads/pdfs/";
+                $target_dir = __DIR__ . "/../../public/uploads/pdfs/";
                 if (!file_exists($target_dir)) {
                     if (!mkdir($target_dir, 0777, true)) {
                         throw new Exception("Erreur système : Impossible de créer le dossier de destination.");
@@ -46,7 +46,9 @@
                     throw new Exception("Erreur lors du téléchargement du fichier.");
                 }
 
-                $cours = new CoursPDF($titre, $description, $categorie_id, $enseignant_id, $target_file);
+                // Store relative path in database
+                $relative_path = "/uploads/pdfs/" . basename($_FILES["fichier_pdf"]["name"]);
+                $cours = new CoursPDF($titre, $description, $categorie_id, $enseignant_id, $relative_path);
             } else {
                 if (empty($_POST['url_video'])) {
                     throw new Exception("L'URL de la vidéo est requise.");

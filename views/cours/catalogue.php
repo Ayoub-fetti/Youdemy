@@ -75,63 +75,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cours_id']) && isset(
 
             <div class="flex items-center mb-6">
                 <div class="relative w-full max-w-xs">
-                    <input id="searchCours" class="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600" placeholder="Rechercher un cours..." type="text"/>
+                    <input id="searchCours" 
+                           type="text" 
+                           class="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600" 
+                           placeholder="Rechercher un cours..."/>
                     <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                 </div>
             </div>
 
-            <div class="flex justify-between items-center mb-6">
-                <span id="totalCours" class="text-gray-500"><?= count($cours) ?> Total des cours</span>
-                <div class="relative">
-                    <select class="flex items-center space-x-2 px-4 py-2 bg-white border rounded-md text-gray-700">
-                        <option value="new">Nouveaux cours</option>
-                        <option value="popular">Cours populaires</option>
-                    </select>
-                </div>
-            </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <?php foreach ($cours as $course): ?>
-                <div class="bg-violet-300 rounded-lg shadow-md p-4">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-gray-500 text-sm flex items-center space-x-1">
-                            <i class="fas fa-id-card-alt text-gray-700"></i>
-                            <span class="creerPar">
-                                creer par : <?= htmlspecialchars($course['enseignant_nom']) ?> le 
-                                <span><?= date('d/m/Y', strtotime($course['date_creation'])) ?></span>
-                            </span>
-                        </span>
-                    </div>
-                    <div class="mb-2">
-                        <span class="text-purple-600 text-sm"><?= htmlspecialchars($course['categorie_nom']) ?></span>
-                    </div>
-                    <h2 class="text-lg font-semibold mb-2">
-                        <?= htmlspecialchars($course['titre']) ?>
-                    </h2>
-                    <p class="text-gray-700 text-sm">
-                        <?= htmlspecialchars($course['description']) ?> 
-                    </p>
-                    <div class="mt-4">
-                        <?php if(isset($_SESSION['user_id'])): ?>
-                            <form action="catalogue.php" method="post">
-                                <input type="hidden" name="cours_id" value="<?= $course['id'] ?>">
-                                <button class="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition duration-300 flex items-center justify-center">
-                                    <i class="fas fa-user-plus mr-2"></i>
-                                    S'inscrire au cours
-                                </button>
-                            </form>
-                        <?php else: ?>
-                            <a href="../user/login.php" class="w-full bg-purple-700 text-white py-2 px-4 rounded-md hover:bg-gray-700 transition duration-300 flex items-center justify-center">
-                                <i class="fas fa-sign-in-alt mr-2"></i>
-                                Se connecter pour s'inscrire
-                            </a>
-                        <?php endif; ?>
+            <!-- Container principal avec une couleur de fond pour le débogage -->
+            <div class="bg-gray-100 p-4 rounded-lg">
+                <!-- Container des cours -->
+                <div id="coursContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Les cours seront chargés ici dynamiquement -->
+                    <div class="col-span-full text-center py-8 text-gray-500">
+                        Chargement des cours...
                     </div>
                 </div>
-                <?php endforeach; ?>
             </div>
         </div>
 
-        <script src="/Youdemy/public/assets/js/Cours.js"></script>
+        <script src="../../public/assets/js/Cours.js"></script>
     </body>
 </html>
