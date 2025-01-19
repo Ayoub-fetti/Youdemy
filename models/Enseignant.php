@@ -323,7 +323,7 @@ class Enseignant extends User {
 
     public function getStatistiquesParCategorie($enseignant_id) {
         $query = "SELECT categories.nom as categorie, COUNT(cours.id) as nombre_cours, COUNT(inscriptions.id) as nombre_inscriptions FROM categories
-                    LEFT JOIN cours ON categories.id = cours.categorie_id AND cours.enseignant_id = 6
+                    LEFT JOIN cours ON categories.id = cours.categorie_id AND cours.enseignant_id = :enseignant_id
                     LEFT JOIN inscriptions ON cours.id = inscriptions.cours_id
                     WHERE cours.id IS NOT NULL
                     GROUP BY categories.id, categories.nom
