@@ -3,6 +3,7 @@ require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../models/User.php';
 require_once __DIR__ . '/../../models/Cours.php';
 require_once __DIR__ . '/../../models/Etudiant.php';
+require_once __DIR__ . '/../../models/Enseignant.php';
 session_start();
 
 // verifier l'utilisatuer est connecter 
@@ -59,13 +60,13 @@ $cours = $etudiant->getCoursInscrit();
                             <span class="text-gray-500 text-sm flex items-center space-x-1">
                                 <i class="fas fa-id-card-alt text-gray-700"></i>
                                 <span class="creerPar">
-                                    creer par : <?= htmlspecialchars($course['enseignant_nom']) ?> le 
+                                    creer par : <?= htmlspecialchars($course['nom']) ?> le 
                                     <span><?= date('d/m/Y', strtotime($course['date_creation'])) ?></span>
                                 </span>
                             </span>
                         </div>
                         <div class="mb-2">
-                            <span class="text-purple-600 text-sm"><?= htmlspecialchars($course['categorie_nom']) ?></span>
+                            <span class="text-purple-600 text-sm"><?= htmlspecialchars($course['categorie']) ?></span>
                         </div>
                         <h3 class="text-xl font-semibold mb-2"><?= htmlspecialchars($course['titre']) ?></h3>
                         <p class="text-gray-600 mb-4"><?= htmlspecialchars($course['description']) ?></p>
