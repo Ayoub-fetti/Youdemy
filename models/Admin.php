@@ -13,16 +13,12 @@ class Admin extends User {
             // fonction pour recuperer tout les cours
 
             public function getAllCours(){
-                $stmt = $this->pdo->prepare("
-                    SELECT 
-                        c.*,
-                        u.nom as nom_enseignant,
-                        GROUP_CONCAT(t.nom) as tags
-                    FROM cours c
-                    INNER JOIN utilisateurs u ON c.enseignant_id = u.id
-                    LEFT JOIN cours_tags ct ON c.id = ct.cours_id
-                    LEFT JOIN tags t ON ct.tag_id = t.id
-                    GROUP BY c.id
+                $stmt = $this->pdo->prepare("SELECT cours.*, utilisateurs.nom as nom_enseignant, GROUP_CONCAT(tags.nom) as tags
+                    FROM cours
+                    INNER JOIN utilisateurs ON cours.enseignant_id = utilisateurs.id
+                    LEFT JOIN cours_tags ON cours.id = cours_tags.cours_id
+                    LEFT JOIN tags ON cours_tags.tag_id = tags.id
+                    GROUP BY cours.id
                 ");
                 $stmt->execute();
                 return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -76,24 +72,27 @@ class Admin extends User {
 
     // obtenir la repartition des cours par categorie
     public function getCoursParCategorie() {
-        $stmt = $this->pdo->prepare("SELECT cat.nom as categorie, COUNT(c.id) as count  FROM cours c  JOIN categories cat ON c.categorie_id = cat.id
-            GROUP BY cat.id, cat.nom ORDER BY count DESC");
+        $stmt = $this->pdo->prepare("SELECT categories.nom as categorie, COUNT(cours.id) as count  FROM cours  
+                                    JOIN categories ON cours.categorie_id = categories.id
+                                    GROUP BY categories.id, categories.nom ORDER BY count DESC");
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     // le cours le plus populaire
     public function getCoursLePlusPopulaire() {
-        $stmt = $this->pdo->prepare("SELECT c.titre, COUNT(i.etudiant_id) as nb_etudiants FROM cours c LEFT JOIN inscriptions i ON c.id = i.cours_id
-            GROUP BY c.id, c.titre ORDER BY nb_etudiants DESC LIMIT 1");
+        $stmt = $this->pdo->prepare("SELECT cours.titre, COUNT(inscriptions.etudiant_id) as nb_etudiants FROM cours  
+                                    LEFT JOIN inscriptions ON cours.id = inscriptions.cours_id
+                                    GROUP BY cours.id, cours.titre ORDER BY nb_etudiants DESC LIMIT 1");
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     // obtenir les top enseignants
     public function getTopEnseignants($limit = 3) {
-        $stmt = $this->pdo->prepare("SELECT u.nom, COUNT(c.id) as nb_cours FROM utilisateurs u JOIN cours c ON u.id = c.enseignant_id
-            WHERE u.role = 'enseignant' GROUP BY u.id, u.nom ORDER BY nb_cours DESC LIMIT :limit");
+        $stmt = $this->pdo->prepare("SELECT utilisateurs.nom, COUNT(cOURS.id) as nb_cours FROM utilisateurs  
+                                    INNER JOIN cours ON utilisateurs.id = cours.enseignant_id
+                                    WHERE utilisateurs.role = 'enseignant' GROUP BY utilisateurs.id, utilisateurs.nom ORDER BY nb_cours DESC LIMIT :limit");
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
