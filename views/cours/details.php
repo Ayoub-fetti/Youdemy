@@ -42,7 +42,11 @@ if (!$cours) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Détails du cours - <?php echo htmlspecialchars($cours['titre']); ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.1.81/build/pdf.min.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        // Définir le worker PDF.js
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
 </head>
 
 <body class="bg-gray-100">
@@ -57,28 +61,127 @@ if (!$cours) {
                 $type = strpos($cours['contenu'], '.pdf') !== false ? 'pdf' : 'video';
                 
                 if ($type === 'pdf') {
-                    // Afficher le PDF dans un iframe avec fallback
                     $pdfPath = $cours['contenu'];
                     
-                    // Nettoyer le chemin pour obtenir juste le nom du fichier
-                    $fileName = basename($pdfPath);
-                    // Construire le nouveau chemin relatif pour l'URL
-                    $pdfUrl = '/uploads/pdfs/' . $fileName;
-                    // Construire le chemin physique complet
-                    $physicalPath = __DIR__ . '/../../public/uploads/pdfs/' . $fileName;
+                    // Si le chemin est absolu, le convertir en relatif
+                    if (strpos($pdfPath, 'C:') === 0) {
+                        // Extraire juste le nom du fichier
+                        $fileName = basename($pdfPath);
+                        $pdfUrl = '/uploads/pdfs/' . $fileName;
+                    } else {
+                        $pdfUrl = $pdfPath;
+                    }
+
+                    // Construire le chemin physique complet pour la vérification
+                    $physicalPath = __DIR__ . '/../../public' . $pdfUrl;
 
                     if (!file_exists($physicalPath)) {
                         echo '<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
                                 <strong class="font-bold">Erreur :</strong>
-                                <span class="block sm:inline">Le fichier PDF n\'est pas trouvé. Chemin : ' . htmlspecialchars($physicalPath) . '</span>
+                                <span class="block sm:inline">Le fichier PDF n\'est pas trouvé.</span>
+                                <div class="mt-2">
+                                    <p>Détails de débogage :</p>
+                                    <ul class="list-disc pl-5">
+                                        <li>Chemin relatif : ' . htmlspecialchars($pdfUrl) . '</li>
+                                        <li>Chemin physique : ' . htmlspecialchars($physicalPath) . '</li>
+                                    </ul>
+                                </div>
                               </div>';
                     } else {
+                        // Construire l'URL complète pour le PDF
+                        $baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]";
+                        $fullPdfUrl = $baseUrl . '/Youdemy/public' . $pdfUrl;
                     ?>
                     <div class="w-full h-screen bg-gray-100 rounded-lg shadow relative">
                         <canvas id="pdfViewer" class="w-full h-full"></canvas>
-                    <!-- ici khass ybaan contenu de pdf -->
+                        <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-4 bg-white p-2 rounded shadow">
+                            <button id="prev" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Précédent</button>
+                            <span id="pageInfo" class="px-4 py-2">Page: <span id="pageNum">1</span> / <span id="pageCount">1</span></span>
+                            <button id="next" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Suivant</button>
+                        </div>
                     </div>
 
+                    <script>
+                        let pdfDoc = null;
+                        let pageNum = 1;
+                        let pageRendering = false;
+                        let pageNumPending = null;
+                        const scale = 1.5;
+                        const canvas = document.getElementById('pdfViewer');
+                        const ctx = canvas.getContext('2d');
+
+                        function renderPage(num) {
+                            pageRendering = true;
+                            pdfDoc.getPage(num).then(function(page) {
+                                const viewport = page.getViewport({scale: scale});
+                                canvas.height = viewport.height;
+                                canvas.width = viewport.width;
+
+                                const renderContext = {
+                                    canvasContext: ctx,
+                                    viewport: viewport
+                                };
+                                const renderTask = page.render(renderContext);
+
+                                renderTask.promise.then(function() {
+                                    pageRendering = false;
+                                    if (pageNumPending !== null) {
+                                        renderPage(pageNumPending);
+                                        pageNumPending = null;
+                                    }
+                                });
+                            });
+
+                            document.getElementById('pageNum').textContent = num;
+                        }
+
+                        function queueRenderPage(num) {
+                            if (pageRendering) {
+                                pageNumPending = num;
+                            } else {
+                                renderPage(num);
+                            }
+                        }
+
+                        function onPrevPage() {
+                            if (pageNum <= 1) {
+                                return;
+                            }
+                            pageNum--;
+                            queueRenderPage(pageNum);
+                        }
+
+                        function onNextPage() {
+                            if (pageNum >= pdfDoc.numPages) {
+                                return;
+                            }
+                            pageNum++;
+                            queueRenderPage(pageNum);
+                        }
+
+                        document.getElementById('prev').addEventListener('click', onPrevPage);
+                        document.getElementById('next').addEventListener('click', onNextPage);
+
+                        // Charger le PDF avec gestion d'erreur
+                        console.log('Loading PDF from:', '<?php echo $fullPdfUrl; ?>');
+                        pdfjsLib.getDocument('<?php echo $fullPdfUrl; ?>').promise
+                            .then(function(pdfDoc_) {
+                                console.log('PDF loaded successfully');
+                                pdfDoc = pdfDoc_;
+                                document.getElementById('pageCount').textContent = pdfDoc.numPages;
+                                renderPage(pageNum);
+                            })
+                            .catch(function(error) {
+                                console.error('Error loading PDF:', error);
+                                const canvas = document.getElementById('pdfViewer');
+                                canvas.insertAdjacentHTML('beforebegin', 
+                                    '<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">' +
+                                        '<strong class="font-bold">Erreur de chargement du PDF:</strong><br>' +
+                                        '<span class="block sm:inline">' + error.message + '</span>' +
+                                    '</div>'
+                                );
+                            });
+                    </script>
                     <?php
                     }
                 } else {
@@ -115,10 +218,10 @@ if (!$cours) {
                 <p>Date d'inscription: <?php echo date('d/m/Y', strtotime($cours['date_inscription'])); ?></p>
             </div>
 
-            <div class="mt-8 flex justify-center">
-                <a href="mes_cours.php" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
-                    Terminer le cours
-                </a>
+            <div class="mt-4 flex space-x-4">
+                <a href="mes_cours.php" class="inline-block px-6 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors">Retour</a>
+                <a href="mes_cours.php" class="inline-block px-6 py-2 bg-blue-500 text-white rounded hover:bg-gray-600 transition-colors">Terminer Cours</a>
+
             </div>
         </div>
     </div>
