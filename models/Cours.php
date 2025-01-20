@@ -91,66 +91,76 @@ class Cours {
             $offset = ($page - 1) * $limit;
 
             // Requête pour obtenir le nombre total de cours
-            $countQuery = "SELECT COUNT(*) as total FROM cours  
-                          INNER JOIN utilisateurs  ON cours.enseignant_id = utilisateurs.id 
+            $countQuery = "SELECT COUNT(DISTINCT cours.id) as total 
+                          FROM cours  
+                          INNER JOIN utilisateurs ON cours.enseignant_id = utilisateurs.id 
                           LEFT JOIN categories ON cours.categorie_id = categories.id 
+                          LEFT JOIN cours_tags ON cours.id = cours_tags.cours_id
+                          LEFT JOIN tags ON cours_tags.tag_id = tags.id
                           WHERE utilisateurs.role = 'enseignant'";
             
             // Requête pour obtenir les cours
-            $query = "SELECT cours.*, utilisateurs.nom as enseignant_nom, categories.nom as categorie_nom 
+            $query = "SELECT DISTINCT cours.*, utilisateurs.nom as enseignant_nom, categories.nom as categorie_nom,
+                     GROUP_CONCAT(DISTINCT tags.nom) as tags
                      FROM cours  
                      INNER JOIN utilisateurs ON cours.enseignant_id = utilisateurs.id 
                      LEFT JOIN categories ON cours.categorie_id = categories.id 
+                     LEFT JOIN cours_tags ON cours.id = cours_tags.cours_id
+                     LEFT JOIN tags ON cours_tags.tag_id = tags.id
                      WHERE utilisateurs.role = 'enseignant'";
 
+            $params = [];
+            
             // Ajouter la condition de recherche si un terme est fourni
             if (!empty($searchTerm)) {
-                $countQuery .= " AND (cours.titre LIKE :search 
-                                OR cours.description LIKE :search 
-                                OR utilisateurs.nom LIKE :search)";
-                
-                $query .= " AND (cours.titre LIKE :search 
-                          OR cours.description LIKE :search 
-                          OR utilisateurs.nom LIKE :search)";
-                
-                $params[':search'] = "%{$searchTerm}%";
+                $searchCondition = " AND (cours.titre LIKE :search 
+                                   OR cours.description LIKE :search 
+                                   OR tags.nom LIKE :search)";
+                $countQuery .= $searchCondition;
+                $query .= $searchCondition;
+                $params[':search'] = "%$searchTerm%";
             }
 
-            // Ajouter l'ordre et la pagination
-            $query .= " ORDER BY cours.date_creation DESC LIMIT :limit OFFSET :offset";
+            $query .= " GROUP BY cours.id, utilisateurs.nom, categories.nom 
+                       ORDER BY cours.date_creation DESC 
+                       LIMIT :limit OFFSET :offset";
 
-            // Executer la requête de comptage
-            $stmtCount = $this->pdo->prepare($countQuery);
-            if (!empty($searchTerm)) {
-                $stmtCount->bindValue(':search', "%{$searchTerm}%", PDO::PARAM_STR);
+            // Exécuter la requête de comptage
+            $countStmt = $this->pdo->prepare($countQuery);
+            foreach ($params as $key => $value) {
+                $countStmt->bindValue($key, $value);
             }
-            $stmtCount->execute();
-            $totalCours = $stmtCount->fetch(PDO::FETCH_ASSOC)['total'];
+            $countStmt->execute();
+            $totalCours = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
 
-            // Executer la requête principale
+            // Exécuter la requête principale
             $stmt = $this->pdo->prepare($query);
-            if (!empty($searchTerm)) {
-                $stmt->bindValue(':search', "%{$searchTerm}%", PDO::PARAM_STR);
+            foreach ($params as $key => $value) {
+                $stmt->bindValue($key, $value);
             }
             $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
             $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
             $stmt->execute();
             
             $cours = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
+
+            // Calculer le nombre total de pages
+            $totalPages = ceil($totalCours / $limit);
+
             return [
                 'cours' => $cours,
                 'total' => $totalCours,
-                'pages' => ceil($totalCours / $limit),
+                'pages' => $totalPages,
                 'current_page' => $page
             ];
+
         } catch (PDOException $e) {
             error_log("Erreur dans getCoursWithPagination: " . $e->getMessage());
             return [
                 'cours' => [],
                 'total' => 0,
                 'pages' => 0,
-                'current_page' => 1
+                'current_page' => $page
             ];
         }
     }
