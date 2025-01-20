@@ -332,4 +332,6 @@ class Enseignant extends User {
         $stmt->execute(['enseignant_id' => $enseignant_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+
 }

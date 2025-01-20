@@ -1,4 +1,6 @@
-<?php 
+
+<?php
+require_once 'User.php'; 
 class Etudiant extends User {
     public function __construct($pdo) {
         parent::__construct($pdo);
@@ -48,6 +50,18 @@ class Etudiant extends User {
         } catch (PDOException $e) {
             error_log("Exception PDO: " . $e->getMessage());
             return [];
+        }
+    }
+
+       // fonction pour changer le status d'inscription (cours terminer)
+       public function terminerCours($coursId){
+        try {
+            $query = "UPDATE inscriptions SET status = 'terminer' WHERE etudiant_id = ? AND cours_id = ?";
+            $stmt = $this->pdo->prepare($query);
+            $success = $stmt->execute([$this->id, $coursId]);
+            
+        } catch (PDOException $e) {
+            return ['success' => false, 'message' => 'Une erreur est survenue'];
         }
     }
 }
