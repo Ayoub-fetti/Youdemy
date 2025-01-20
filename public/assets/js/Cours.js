@@ -131,6 +131,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                     <h2 class="text-lg font-semibold mb-2">${course.titre || 'Sans titre'}</h2>
                     <p class="text-gray-700 text-sm">${course.description || 'Aucune description'}</p>
+                    ${course.tags ? `
+                    <div class="mt-2 flex flex-wrap gap-2">
+                        ${course.tags.split(',').map(tag => `
+                            <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">${tag.trim()}</span>
+                        `).join('')}
+                    </div>
+                    ` : ''}
                     <div class="mt-4">
                         ${isUserLoggedIn() ? `
                             <form action="" method="POST" class="inscription-form">
