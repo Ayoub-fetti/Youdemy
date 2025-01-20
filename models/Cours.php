@@ -19,12 +19,11 @@ class Cours {
     // fonction pour recuperer tout les cours 
     public function getAllCours() {
         try {
-            $query = "SELECT c.*, u.nom as enseignant_nom, cat.nom as categorie_nom 
-                     FROM cours c 
-                     INNER JOIN utilisateurs u ON c.enseignant_id = u.id 
-                     LEFT JOIN categories cat ON c.categorie_id = cat.id 
-                     WHERE u.role = 'enseignant'
-                     ORDER BY c.date_creation DESC";
+            $query = "SELECT cours.*, utilisateurs.nom as enseignant_nom, categories.nom as categorie_nom FROM cours  
+                     INNER JOIN utilisateurs ON cours.enseignant_id = utilisateurs.id 
+                     LEFT JOIN categories ON cours.categorie_id = categories.id 
+                     WHERE utilisateurs.role = 'enseignant'
+                     ORDER BY cours.date_creation DESC";
             
             $stmt = $this->pdo->prepare($query);
             $stmt->execute();
@@ -42,13 +41,13 @@ class Cours {
 // fonction pour recuperer le nom  d'un enseignant qui a cree un cours
   public function getCoursByEnseignant($enseignant_id) {
         try {
-            $query = "SELECT c.*, u.nom as enseignant_nom, cat.nom as categorie_nom 
-                     FROM cours c 
-                     LEFT JOIN utilisateurs u ON c.enseignant_id = u.id 
-                     LEFT JOIN categories cat ON c.categorie_id = cat.id 
-                     WHERE c.enseignant_id = :enseignant_id 
-                     AND u.role = :role
-                     ORDER BY c.date_creation DESC";
+            $query = "SELECT cours.*, utilisateurs.nom as enseignant_nom, categories.nom as categorie_nom 
+                     FROM cours 
+                     LEFT JOIN utilisateurs  ON cours.enseignant_id = utilisateurs.id 
+                     LEFT JOIN categories ON cours.categorie_id = categories.id 
+                     WHERE cours.enseignant_id = :enseignant_id
+                     AND utilisateurs.role = :role
+                     ORDER BY cours.date_creation DESC";
             
             $stmt = $this->pdo->prepare($query);
             $stmt->bindValue(':enseignant_id', $enseignant_id, PDO::PARAM_INT);
@@ -65,13 +64,13 @@ class Cours {
     // fonction pour recuperer les cours par categorie
     public function getCoursByCategorie($categorie_id) {
         try {
-            $query = "SELECT c.*, u.nom as enseignant_nom, cat.nom as categorie_nom 
-                     FROM cours c 
-                     LEFT JOIN utilisateurs u ON c.enseignant_id = u.id 
-                     LEFT JOIN categories cat ON c.categorie_id = cat.id 
-                     WHERE c.categorie_id = :categorie_id 
-                     AND u.role = :role
-                     ORDER BY c.date_creation DESC";
+            $query = "SELECT cours.*, utilisateurs.nom as enseignant_nom, categories.nom as categorie_nom 
+                     FROM cours 
+                     LEFT JOIN utilisateurs ON cours.enseignant_id = utilisateurs.id 
+                     LEFT JOIN categories ON cours.categorie_id = categories.id 
+                     WHERE cours.categorie_id = :categorie_id 
+                     AND utilisateurs.role = :role
+                     ORDER BY cours.date_creation DESC";
             
             $stmt = $this->pdo->prepare($query);
             $stmt->bindValue(':categorie_id', $categorie_id, PDO::PARAM_INT);
@@ -92,33 +91,33 @@ class Cours {
             $offset = ($page - 1) * $limit;
 
             // Requête pour obtenir le nombre total de cours
-            $countQuery = "SELECT COUNT(*) as total FROM cours c 
-                          INNER JOIN utilisateurs u ON c.enseignant_id = u.id 
-                          LEFT JOIN categories cat ON c.categorie_id = cat.id 
-                          WHERE u.role = 'enseignant'";
+            $countQuery = "SELECT COUNT(*) as total FROM cours  
+                          INNER JOIN utilisateurs  ON cours.enseignant_id = utilisateurs.id 
+                          LEFT JOIN categories ON cours.categorie_id = categories.id 
+                          WHERE utilisateurs.role = 'enseignant'";
             
             // Requête pour obtenir les cours
-            $query = "SELECT c.*, u.nom as enseignant_nom, cat.nom as categorie_nom 
-                     FROM cours c 
-                     INNER JOIN utilisateurs u ON c.enseignant_id = u.id 
-                     LEFT JOIN categories cat ON c.categorie_id = cat.id 
-                     WHERE u.role = 'enseignant'";
+            $query = "SELECT cours.*, utilisateurs.nom as enseignant_nom, categories.nom as categorie_nom 
+                     FROM cours  
+                     INNER JOIN utilisateurs ON cours.enseignant_id = utilisateurs.id 
+                     LEFT JOIN categories ON cours.categorie_id = categories.id 
+                     WHERE utilisateurs.role = 'enseignant'";
 
             // Ajouter la condition de recherche si un terme est fourni
             if (!empty($searchTerm)) {
-                $countQuery .= " AND (c.titre LIKE :search 
-                                OR c.description LIKE :search 
-                                OR u.nom LIKE :search)";
+                $countQuery .= " AND (cours.titre LIKE :search 
+                                OR cours.description LIKE :search 
+                                OR utilisateurs.nom LIKE :search)";
                 
-                $query .= " AND (c.titre LIKE :search 
-                          OR c.description LIKE :search 
-                          OR u.nom LIKE :search)";
+                $query .= " AND (cours.titre LIKE :search 
+                          OR cours.description LIKE :search 
+                          OR utilisateurs.nom LIKE :search)";
                 
                 $params[':search'] = "%{$searchTerm}%";
             }
 
             // Ajouter l'ordre et la pagination
-            $query .= " ORDER BY c.date_creation DESC LIMIT :limit OFFSET :offset";
+            $query .= " ORDER BY cours.date_creation DESC LIMIT :limit OFFSET :offset";
 
             // Executer la requête de comptage
             $stmtCount = $this->pdo->prepare($countQuery);
@@ -155,29 +154,5 @@ class Cours {
             ];
         }
     }
-
-    // Fonction pour mettre à jour un cours
-    // public function updateCours($id, $titre, $description, $contenu, $categorie_id) {
-    //     try {
-    //         $query = "UPDATE cours 
-    //                  SET titre = :titre, 
-    //                      description = :description, 
-    //                      contenu = :contenu, 
-    //                      categorie_id = :categorie_id 
-    //                  WHERE id = :id";
-            
-    //         $stmt = $this->pdo->prepare($query);
-    //         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
-    //         $stmt->bindValue(':titre', $titre, PDO::PARAM_STR);
-    //         $stmt->bindValue(':description', $description, PDO::PARAM_STR);
-    //         $stmt->bindValue(':contenu', $contenu, PDO::PARAM_STR);
-    //         $stmt->bindValue(':categorie_id', $categorie_id, PDO::PARAM_INT);
-            
-    //         return $stmt->execute();
-    //     } catch (PDOException $e) {
-    //         error_log("Erreur dans updateCours: " . $e->getMessage());
-    //         return false;
-    //     }
-    // }
 }
 ?>

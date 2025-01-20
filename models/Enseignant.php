@@ -293,13 +293,12 @@ class Enseignant extends User {
     }
 
     public function getCoursLesPlusUtilises($enseignant_id, $limit = 5) {
-        $query = "SELECT c.titre, COUNT(i.id) as nombre_inscriptions 
-                FROM cours c 
-                LEFT JOIN inscriptions i ON c.id = i.cours_id 
-                WHERE c.enseignant_id = :enseignant_id 
-                GROUP BY c.id, c.titre 
-                ORDER BY nombre_inscriptions DESC 
-                LIMIT :limit";
+        $query = "SELECT cours.titre, COUNT(inscriptions.id) as nombre_inscriptions FROM cours 
+        LEFT JOIN inscriptions ON cours.id = inscriptions.cours_id 
+        WHERE cours.enseignant_id = :enseignant_id 
+        GROUP BY cours.id, cours.titre 
+        ORDER BY nombre_inscriptions DESC 
+        LIMIT :limit";
         $stmt = $this->db->prepare($query);
         $stmt->bindValue(':enseignant_id', $enseignant_id, PDO::PARAM_INT);
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
@@ -307,16 +306,14 @@ class Enseignant extends User {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+        // pour voir les inscription par mois
     public function getInscriptionsParMois($enseignant_id, $limit = 12) {
-        $query = "SELECT 
-                    DATE_FORMAT(i.date_inscription, '%Y-%m') as mois,
-                    COUNT(*) as nombre_inscriptions
-                FROM inscriptions i
-                JOIN cours c ON i.cours_id = c.id
-                WHERE c.enseignant_id = :enseignant_id
-                GROUP BY DATE_FORMAT(i.date_inscription, '%Y-%m')
-                ORDER BY mois DESC
-                LIMIT :limit";
+        $query = "SELECT DATE_FORMAT(inscriptions.date_inscription, '%Y-%m') as mois, COUNT(*) as nombre_inscriptions FROM inscriptions
+                  INNER JOIN cours ON inscriptions.cours_id = cours.id
+                  WHERE cours.enseignant_id = :enseignant_id
+                  GROUP BY DATE_FORMAT(inscriptions.date_inscription, '%Y-%m')
+                  ORDER BY mois DESC
+                  LIMIT :limit";
         $stmt = $this->db->prepare($query);
         $stmt->bindValue(':enseignant_id', $enseignant_id, PDO::PARAM_INT);
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
@@ -325,16 +322,12 @@ class Enseignant extends User {
     }
 
     public function getStatistiquesParCategorie($enseignant_id) {
-        $query = "SELECT 
-                    cat.nom as categorie,
-                    COUNT(c.id) as nombre_cours,
-                    COUNT(i.id) as nombre_inscriptions
-                FROM categories cat
-                LEFT JOIN cours c ON cat.id = c.categorie_id AND c.enseignant_id = :enseignant_id
-                LEFT JOIN inscriptions i ON c.id = i.cours_id
-                WHERE c.id IS NOT NULL
-                GROUP BY cat.id, cat.nom
-                ORDER BY nombre_cours DESC";
+        $query = "SELECT categories.nom as categorie, COUNT(cours.id) as nombre_cours, COUNT(inscriptions.id) as nombre_inscriptions FROM categories
+                    LEFT JOIN cours ON categories.id = cours.categorie_id AND cours.enseignant_id = :enseignant_id
+                    LEFT JOIN inscriptions ON cours.id = inscriptions.cours_id
+                    WHERE cours.id IS NOT NULL
+                    GROUP BY categories.id, categories.nom
+                    ORDER BY nombre_cours DESC";
         $stmt = $this->db->prepare($query);
         $stmt->execute(['enseignant_id' => $enseignant_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);

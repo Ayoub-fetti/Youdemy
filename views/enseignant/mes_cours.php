@@ -22,15 +22,15 @@
     }
 
     // Recuperer la liste des cours de l'enseignant
-    $query = "SELECT c.*, cat.nom as categorie_nom,
+    $query = "SELECT cours.*, categories.nom as categorie_nom,
             CASE 
-            WHEN c.contenu LIKE '%.pdf' THEN 'pdf'
+            WHEN cours.contenu LIKE '%.pdf' THEN 'pdf'
             ELSE 'video'
             END as type
-            FROM cours c 
-            LEFT JOIN categories cat ON c.categorie_id = cat.id 
-            WHERE c.enseignant_id = :enseignant_id 
-            ORDER BY c.date_creation DESC";
+            FROM cours
+            LEFT JOIN categories ON cours.categorie_id = categories.id 
+            WHERE cours.enseignant_id = :enseignant_id 
+            ORDER BY cours.date_creation DESC";
 
     $stmt = $pdo->prepare($query);
     $stmt->execute([':enseignant_id' => $enseignant_id]);

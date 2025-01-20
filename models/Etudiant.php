@@ -34,12 +34,12 @@ class Etudiant extends User {
 
     public function getCoursInscrit() {
         try {
-            $query = "SELECT c.*, u.nom as enseignant_nom, cat.nom as categorie_nom FROM cours c 
-                     JOIN inscriptions i ON c.id = i.cours_id 
-                     JOIN utilisateurs u ON c.enseignant_id = u.id 
-                     JOIN categories cat ON c.categorie_id = cat.id
-                     WHERE i.etudiant_id = ?
-                     ORDER BY i.date_inscription DESC";
+            $query = "SELECT cours.*, utilisateurs.nom as nom , categories.nom as categorie FROM cours  
+            INNER JOIN inscriptions ON cours.id = inscriptions.cours_id 
+            INNER JOIN utilisateurs  ON cours.enseignant_id = utilisateurs.id 
+            INNER JOIN categories ON cours.categorie_id = categories.id
+            WHERE inscriptions.etudiant_id = ?
+            ORDER BY inscriptions.date_inscription DESC";
             $stmt = $this->pdo->prepare($query);
             $stmt->execute([$this->id]);
                         
