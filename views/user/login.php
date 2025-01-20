@@ -132,7 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                 <button 
                     type="submit" 
-                    class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-4 rounded-lg transition duration-300 transform hover:scale-[1.02]"
+                    class="w-full bg-white hover:bg-gray-100 text-blue-400 font-medium py-3 px-4 rounded-lg transition duration-300 transform hover:scale-[1.02]"
                 >
                     Se connecter
                 </button>
