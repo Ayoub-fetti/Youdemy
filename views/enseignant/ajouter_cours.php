@@ -7,6 +7,8 @@
     $database = new Database();
     $pdo = $database->connect();
 
+    
+
     // Recuperer l'ID de l'enseignant
     session_start();
     if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'enseignant') {
@@ -16,6 +18,7 @@
     $enseignant_id = $_SESSION['user_id'];
     $message = '';
 
+   
     // Check for success message from URL
     if (isset($_GET['success']) && $_GET['success'] == '1') {
         $message = "Le cours a été ajouté avec succès !";
@@ -94,6 +97,7 @@
     $stmt_categories = $pdo->prepare($query_categories);
     $stmt_categories->execute();
     $categories = $stmt_categories->fetchAll(PDO::FETCH_ASSOC);
+
 ?>
 
 <!DOCTYPE html>

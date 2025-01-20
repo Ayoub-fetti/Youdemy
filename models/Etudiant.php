@@ -1,4 +1,3 @@
-
 <?php
 require_once 'User.php'; 
 class Etudiant extends User {
@@ -36,12 +35,14 @@ class Etudiant extends User {
 
     public function getCoursInscrit() {
         try {
-            $query = "SELECT cours.*, utilisateurs.nom as nom , categories.nom as categorie FROM cours  
-            INNER JOIN inscriptions ON cours.id = inscriptions.cours_id 
-            INNER JOIN utilisateurs  ON cours.enseignant_id = utilisateurs.id 
-            INNER JOIN categories ON cours.categorie_id = categories.id
-            WHERE inscriptions.etudiant_id = ?
-            ORDER BY inscriptions.date_inscription DESC";
+            $query = "SELECT cours.*, utilisateurs.nom as nom, categories.nom as categorie, 
+                    inscriptions.date_inscription, inscriptions.status as inscription_status 
+                    FROM cours  
+                    INNER JOIN inscriptions ON cours.id = inscriptions.cours_id 
+                    INNER JOIN utilisateurs ON cours.enseignant_id = utilisateurs.id 
+                    INNER JOIN categories ON cours.categorie_id = categories.id
+                    WHERE inscriptions.etudiant_id = ?
+                    ORDER BY inscriptions.date_inscription DESC";
             $stmt = $this->pdo->prepare($query);
             $stmt->execute([$this->id]);
                         

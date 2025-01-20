@@ -24,6 +24,8 @@ $userId = $_SESSION['user_id'];
 $database = new Database();
 $pdo = $database->connect();
 $etudiant = new Etudiant( $pdo);
+$cours = $etudiant->getCoursInscrit();
+
 
 
 // traitement pour terminer le ccours 
@@ -63,30 +65,28 @@ if (!$cours) {
     </script>
 </head>
 
-<body class="bg-gray-100">
-    <div class="container mx-auto px-4 py-8">
-        <div class="bg-white rounded-lg shadow-lg p-6">
-            <h1 class="text-3xl font-bold mb-4"><?php echo htmlspecialchars($cours['titre']); ?></h1>
-            <p class="text-gray-600 mb-6"><?php echo htmlspecialchars($cours['description']); ?></p>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="bg-white rounded-lg shadow-lg p-4 sm:p-6 lg:p-8">
+            <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+                <h1 class="text-2xl sm:text-3xl font-bold text-center sm:text-left"><?php echo htmlspecialchars($cours['titre']); ?></h1>
+                <a href="mes_cours.php" class="bg-gray-500 hover:bg-gray-700 text-white px-4 py-2 rounded-md transition duration-300 text-sm w-full sm:w-auto text-center">
+                    <i class="fas fa-arrow-left mr-2"></i>Retour aux cours
+                </a>
+            </div>
+            
+            <p class="text-gray-600 mb-6 text-sm sm:text-base"><?php echo htmlspecialchars($cours['description']); ?></p>
             
             <div class="mt-8">
                 <?php
-                // le type de cours (PDF ou Video)
                 $type = strpos($cours['contenu'], '.pdf') !== false ? 'pdf' : 'video';
                 
                 if ($type === 'pdf') {
                     $pdfPath = $cours['contenu'];
-                    
-                    // Si le chemin est absolu, le convertir en relatif
                     if (strpos($pdfPath, 'C:') === 0) {
-                        // Extraire juste le nom du fichier
-                        $fileName = basename($pdfPath);
-                        $pdfUrl = '/uploads/pdfs/' . $fileName;
-                    } else {
-                        $pdfUrl = $pdfPath;
+                        $pdfPath = str_replace('C:/laragon/www/Youdemy/', '', $pdfPath);
                     }
-
-                    // Construire le chemin physique complet pour la vérification
+                    $pdfUrl = '/uploads/pdfs/' . basename($pdfPath);
                     $physicalPath = __DIR__ . '/../../public' . $pdfUrl;
 
                     if (!file_exists($physicalPath)) {
@@ -102,16 +102,21 @@ if (!$cours) {
                                 </div>
                               </div>';
                     } else {
-                        // Construire l'URL complète pour le PDF
                         $baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]";
                         $fullPdfUrl = $baseUrl . '/Youdemy/public' . $pdfUrl;
                     ?>
-                    <div class="w-full h-screen bg-gray-100 rounded-lg shadow relative">
-                        <canvas id="pdfViewer" class="w-full h-full"></canvas>
-                        <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-4 bg-white p-2 rounded shadow">
-                            <button id="prev" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Précédent</button>
-                            <span id="pageInfo" class="px-4 py-2">Page: <span id="pageNum">1</span> / <span id="pageCount">1</span></span>
-                            <button id="next" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Suivant</button>
+                    <div class="w-full max-w-4xl mx-auto">
+                        <div class="bg-gray-100 p-4 rounded-lg mb-4">
+                            <div class="flex flex-wrap justify-center sm:justify-between items-center gap-4 mb-4">
+                                <div class="flex space-x-2">
+                                    <button id="prev" class="bg-purple-500 hover:bg-purple-700 text-white px-4 py-2 rounded-md transition duration-300">Précédent</button>
+                                    <button id="next" class="bg-purple-500 hover:bg-purple-700 text-white px-4 py-2 rounded-md transition duration-300">Suivant</button>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span>Page: <span id="page_num"></span> / <span id="page_count"></span></span>
+                                </div>
+                            </div>
+                            <canvas id="pdf_renderer" class="w-full h-auto border border-gray-300 rounded-lg"></canvas>
                         </div>
                     </div>
 
@@ -121,7 +126,7 @@ if (!$cours) {
                         let pageRendering = false;
                         let pageNumPending = null;
                         const scale = 1.5;
-                        const canvas = document.getElementById('pdfViewer');
+                        const canvas = document.getElementById('pdf_renderer');
                         const ctx = canvas.getContext('2d');
 
                         function renderPage(num) {
@@ -146,7 +151,7 @@ if (!$cours) {
                                 });
                             });
 
-                            document.getElementById('pageNum').textContent = num;
+                            document.getElementById('page_num').textContent = num;
                         }
 
                         function queueRenderPage(num) {
@@ -182,12 +187,12 @@ if (!$cours) {
                             .then(function(pdfDoc_) {
                                 console.log('PDF loaded successfully');
                                 pdfDoc = pdfDoc_;
-                                document.getElementById('pageCount').textContent = pdfDoc.numPages;
+                                document.getElementById('page_count').textContent = pdfDoc.numPages;
                                 renderPage(pageNum);
                             })
                             .catch(function(error) {
                                 console.error('Error loading PDF:', error);
-                                const canvas = document.getElementById('pdfViewer');
+                                const canvas = document.getElementById('pdf_renderer');
                                 canvas.insertAdjacentHTML('beforebegin', 
                                     '<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">' +
                                         '<strong class="font-bold">Erreur de chargement du PDF:</strong><br>' +
@@ -199,45 +204,42 @@ if (!$cours) {
                     <?php
                     }
                 } else {
-                    // Transformer l'URL YouTube en URL d'intégration
                     $videoUrl = $cours['contenu'];
                     if (strpos($videoUrl, 'youtube.com') !== false || strpos($videoUrl, 'youtu.be') !== false) {
-                        // Extraire l'ID de la vidéo YouTube
+                        // Extract YouTube video ID
                         preg_match('/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/', $videoUrl, $matches);
                         if (isset($matches[1])) {
                             $videoId = $matches[1];
-                            $embedUrl = "https://www.youtube.com/embed/" . $videoId;
-                        } else {
-                            $embedUrl = $videoUrl;
+                            ?>
+                            <div class="w-full max-w-5xl mx-auto">
+                                <div class="relative w-full" style="padding-bottom: 56.25%;">
+                                    <iframe 
+                                        class="absolute top-0 left-0 w-full h-full rounded-lg shadow-lg"
+                                        src="https://www.youtube.com/embed/<?php echo $videoId; ?>"
+                                        frameborder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowfullscreen>
+                                    </iframe>
+                                </div>
+                            </div>
+                            <?php
                         }
-                    } else {
-                        $embedUrl = $videoUrl;
                     }
-                    ?>
-                    <div class="aspect-w-16 aspect-h-9">
-                        <iframe 
-                            src="<?php echo htmlspecialchars($embedUrl); ?>"
-                            class="w-full h-[600px] rounded-lg shadow"
-                            frameborder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowfullscreen>
-                        </iframe>
-                    </div>
-                    <?php
                 }
                 ?>
             </div>
-
-            <div class="mt-6 text-gray-600">
-                <p>Date d'inscription: <?php echo date('d/m/Y', strtotime($cours['date_inscription'])); ?></p>
-            </div>
-
-            <div class="mt-4 flex space-x-4">
-                <a href="mes_cours.php" class="inline-block px-6 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors">Retour</a>
-                <form action="" method="post">
-                    <button type="submit" name="terminer_cours" class="inline-block px-6 py-2 bg-blue-500 text-white rounded hover:bg-gray-600 transition-colors">Terminer  Cours</button>
-                </form>
-
+        
+                <div class="mt-6 space-y-4">
+                    <p class="text-gray-600 text-sm">
+                        <i class="far fa-calendar-alt mr-2"></i>
+                        Date d'inscription: <?php echo date('d/m/Y', strtotime($cours['date_inscription'])); ?>
+                    </p>
+                    
+                    <form method="POST" class="mt-4">
+                        <button type="submit" name="terminer_cours" class="w-full sm:w-auto bg-green-500 hover:bg-green-700 text-white px-6 py-2 rounded-md transition duration-300">
+                            <i class="fas fa-check-circle mr-2"></i>Marquer comme terminé
+                        </button>    
+                    </form>
             </div>
         </div>
     </div>

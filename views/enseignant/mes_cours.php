@@ -44,6 +44,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mes Cours</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
     <link rel="stylesheet" href="../../public/assets/css/style.css">
 </head>
 <body class="bg-gray-100">
@@ -91,10 +92,10 @@
                             </td>
                             <td class="px-4 py-3 text-sm text-gray-900"><?php echo htmlspecialchars($cours['date_creation']); ?></td>
                             <td class="px-4 py-3 text-sm text-gray-900">
-                                <a href="edit_course.php?id=<?php echo $cours['id']; ?>" class="text-indigo-600 hover:text-indigo-900">Modifier</a>
+                                <a href="edit_course.php?id=<?php echo $cours['id']; ?>" class="text-indigo-600 hover:text-indigo-900"><i class="fas fa-edit"></i></a>
                                 <form action="delete_course.php" method="POST" style="display:inline;">
                                     <input type="hidden" name="id" value="<?php echo $cours['id']; ?>">
-                                    <button type="submit" class="text-red-600 hover:text-red-900 ml-2" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce cours?')">Supprimer</button>
+                                    <button type="submit" class="text-red-600 hover:text-red-900 ml-4 " onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce cours?')"><i class="fas fa-trash"></i></button>
                                 </form>
                             </td>
                         </tr>

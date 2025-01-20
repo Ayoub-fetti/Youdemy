@@ -20,7 +20,7 @@ if (!$cours_id) {
     header('Location: mes_cours.php');
     exit;
 }
-var_dump($cours_id);
+
 var_dump($enseignant);
 
 
