@@ -1,9 +1,12 @@
 <?php
 require_once __DIR__ . '/../../models/Cours.php';
+require_once __DIR__ . '/../../models/Etudiant.php';
+require_once __DIR__ . '/../../models/User.php';
 require_once __DIR__ . '/../../models/CoursSpecifique.php';
 require_once __DIR__ . '/../../models/CoursPDF.php';
 require_once __DIR__ . '/../../models/CoursVideo.php';
 require_once __DIR__ . '/../../config/Database.php';
+
 session_start();
 
 if (!isset($_SESSION['user_id'])) {
@@ -20,12 +23,23 @@ $coursId = $_GET['id'];
 $userId = $_SESSION['user_id'];
 $database = new Database();
 $pdo = $database->connect();
+$etudiant = new Etudiant( $pdo);
+
+
+// traitement pour terminer le ccours 
+ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['terminer_cours'])) {
+    
+    $etudiant->terminerCours($coursId);
+    header('Location: mes_cours.php');
+    exit();
+}
+
 
 // verifier si student est inscrit a ce cours
-$stmt = $pdo->prepare("SELECT c.*, i.date_inscription   
-                       FROM cours c 
-                       INNER JOIN inscriptions i ON c.id = i.cours_id 
-                       WHERE c.id = ? AND i.etudiant_id = ?");
+$stmt = $pdo->prepare("SELECT cours.*, inscriptions.date_inscription   
+                       FROM cours 
+                       INNER JOIN inscriptions  ON cours.id = inscriptions.cours_id 
+                       WHERE cours.id = ? AND inscriptions.etudiant_id = ?");
 $stmt->execute([$coursId, $userId]);
 $cours = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -220,7 +234,9 @@ if (!$cours) {
 
             <div class="mt-4 flex space-x-4">
                 <a href="mes_cours.php" class="inline-block px-6 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors">Retour</a>
-                <a href="mes_cours.php" class="inline-block px-6 py-2 bg-blue-500 text-white rounded hover:bg-gray-600 transition-colors">Terminer Cours</a>
+                <form action="" method="post">
+                    <button type="submit" name="terminer_cours" class="inline-block px-6 py-2 bg-blue-500 text-white rounded hover:bg-gray-600 transition-colors">Terminer  Cours</button>
+                </form>
 
             </div>
         </div>
