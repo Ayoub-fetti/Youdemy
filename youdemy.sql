@@ -73,7 +73,7 @@ INSERT INTO `cours` (`id`, `titre`, `description`, `contenu`, `categorie_id`, `e
 (5, 'Physique des Particules', 'Exploration des concepts fondamentaux de la physique des particules.', 'https://www.youtube.com/watch?v=G-QlEwuV5BE', 2, 8, '2025-01-15 08:49:01'),
 (6, 'Économie Internationale', 'Analyse des échanges commerciaux et des politiques économiques mondiales.', 'https://www.youtube.com/watch?v=G-QlEwuV5BE', 5, 6, '2025-01-15 08:49:01'),
 (7, 'Calcul Intégral et Différentiel', 'Principes avancés des mathématiques pour l\'ingénierie.', 'https://www.youtube.com/watch?v=G-QlEwuV5BE', 1, 8, '2025-01-15 08:49:01'),
-(8, 'Développement Web Full Stack', 'Introduction au développement d\'applications web modernes.', 'https://www.youtube.com/watch?v=G-QlEwuV5BE', 3, 7, '2025-01-15 08:49:01'),
+(8, 'Développement Web Full Stack', 'Introduction au développement d applications web modernes.', 'https://www.youtube.com/watch?v=G-QlEwuV5BE', 3, 7, '2025-01-15 08:49:01'),
 (9, 'Géographie Urbaine', 'Étude des dynamiques des villes et des espaces urbains.', 'https://www.youtube.com/watch?v=G-QlEwuV5BE', 4, 8, '2025-01-15 08:49:01'),
 (43, 'video', 'video pour tester', 'https://www.youtube.com/watch?v=xzZDws9PJ6Q', 5, 7, '2025-01-18 11:01:33'),
 (47, 'pdf', 'pdf', 'C:\\laragon\\www\\Youdemy\\views\\enseignant/../../public/uploads/pdfs/portfolio.pdf', 1, 7, '2025-01-19 10:38:33'),
