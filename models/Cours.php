@@ -115,6 +115,8 @@ class Cours {
             if (!empty($searchTerm)) {
                 $searchCondition = " AND (cours.titre LIKE :search 
                                    OR cours.description LIKE :search 
+                                   OR utilisateurs.nom LIKE :search 
+                                   OR categories.nom LIKE :search 
                                    OR tags.nom LIKE :search)";
                 $countQuery .= $searchCondition;
                 $query .= $searchCondition;

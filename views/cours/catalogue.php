@@ -101,11 +101,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cours_id']) && isset(
                 <div class="max-w-xl mx-auto">
                     <div class="relative">
                         <input id="searchCours" 
-                               type="text" 
-                               class="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-300" 
-                               placeholder="Rechercher un cours par titre, catégorie ou enseignant..."/>
+                        type="text" 
+                        class="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-300" 
+                        placeholder="Rechercher par titre, catégorie, enseignant, description ou tags..."/>
                         <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                     </div>
+                    <p id="totalCours" class="text-gray-600 mb-3 mt-3 text-center text-gray-600"></p>
                 </div>
             </div>
 
