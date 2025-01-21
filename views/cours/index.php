@@ -12,10 +12,11 @@
   <link rel="stylesheet" href="../../public/assets/css/style.css">
 
  </head>
+<!-- body -->
  <body class="bg-gradient-to-r from-blue-500 to-purple-500 h-screen text-black">
   <header class="flex justify-between items-center p-4">
    <div class="flex items-center space-x-4">
-    <img alt="Preply logo" class="h-16" src="../../public/uploads/image/logo.png"/>
+    <img alt="Preply logo" class="h-16" src="../../public/uploads/image/gif.gif"/>
     <nav class="hidden md:flex space-x-4" >
     <a id="navbar" class="text-white text-xl" href="catalogue.php">
          Decouvrire nos cours
